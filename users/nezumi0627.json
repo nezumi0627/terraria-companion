@@ -1,7 +1,7 @@
 {
   "id": "nezumi0627",
   "pinHash": "8f85d66000972c4a741f930c122227e60fee5c453d7e1b373e229834f76e8d76",
-  "updatedAt": 1783900295794,
+  "updatedAt": 1783900301102,
   "state": {
     "owned": {},
     "defeatedBosses": {},
@@ -21,6 +21,11 @@
       "ガイド"
     ],
     "recentViews": [
+      {
+        "kind": "item",
+        "id": "empress-wings",
+        "at": 1783900298251
+      },
       {
         "kind": "item",
         "id": "terragrim",
@@ -115,11 +120,6 @@
         "kind": "item",
         "id": "whoopie-cushion",
         "at": 1783876445594
-      },
-      {
-        "kind": "item",
-        "id": "grim-old-barb",
-        "at": 1783876433377
       }
     ],
     "dailyTasks": [],
