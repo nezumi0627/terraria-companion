@@ -120,6 +120,7 @@ export function looksLikeBadName(name) {
   if (/^ダメージは|^防御力は|^ノックバックは/.test(name)) return true
   if (/ダメージは|防御力は|ノックバックは|難易度で変化|Armorを|相当$/.test(name)) return true
   if (/^\d+(\.\d+)?$/.test(name)) return true
+  if (/^\d+(\.\d+)+\w*$/.test(name)) return true
   // Trivia / category false positives that used to come from first 『』
   if (
     /^(IT（イット）|サタデー・ナイト・ライブ|死ぬ|ピーター・パン|たまごっち|ドラえもん|ポケモン|マリオ)$/.test(
@@ -143,9 +144,9 @@ export function extractJaName(wt, enName) {
     if (v && /[ぁ-んァ-ヶ一-龥]/.test(v) && !looksLikeBadName(v)) return v
   }
 
-  // {{パンくず2|…}}\n\n骨のグローブ{{日本語化1.4}}
+  // {{パンくず2|…}} / {{パンくず3|…}}\n\n銅のつるはし (…訳) / 骨のグローブ{{日本語化1.4}}
   const afterCrumb = wt.match(
-    /\{\{\s*パンくず[^{}]*\}\}\s*(?:\r?\n|\s)*([ぁ-んァ-ヶ一-龥々ーA-Za-z0-9「」『』]+)(?:\{\{日本語化[^}]*\}\})?/,
+    /\{\{\s*パンくず\d?\s*[^{}]*\}\}\s*(?:\r?\n|<\s*br\s*\/?\s*>|\s)*([ぁ-んァ-ヶ一-龥々ーA-Za-z0-9「」『』・＝\-]+)(?:\s*[\(（][^\n]{0,120}[\)）])?(?:\s*\{\{日本語化[^}]*\}\})?/,
   )
   if (afterCrumb) {
     const v = cleanName(afterCrumb[1])
@@ -360,7 +361,25 @@ const RARITY_MAP = [
 
 export function extractRarity(wt, fields) {
   const f = fields || parseInfoboxFields(wt)
-  const raw = `${f.rarity || f.rare || ''} ${f['rare level'] || ''}`
+  const raw = `${f.rarity || f.rare || f['レア度'] || f['希少度'] || ''} ${f['rare level'] || ''} ${wt.slice(0, 2800)}`
+  const rareTpl = raw.match(/\{\{\s*rare\s*\|\s*(\d+)\s*\}\}/i)
+  if (rareTpl) {
+    const n = Number(rareTpl[1])
+    const byNum = ['white', 'blue', 'green', 'orange', 'lightred', 'pink', 'lightpurple', 'lime', 'yellow', 'cyan', 'red', 'purple']
+    if (n >= 0 && n < byNum.length) return byNum[n]
+    if (n >= 12) return 'rainbow'
+  }
+  const colorFile = raw.match(/Rarity_color_(\d+|rainbow|red|yellow|cyan|lime|pink|orange|green|blue|white|gray|grey)/i)
+  if (colorFile) {
+    const k = colorFile[1].toLowerCase()
+    if (/^\d+$/.test(k)) {
+      const n = Number(k)
+      const byNum = ['white', 'blue', 'green', 'orange', 'lightred', 'pink', 'lightpurple', 'lime', 'yellow', 'cyan', 'red', 'purple']
+      if (n >= 0 && n < byNum.length) return byNum[n]
+      if (n >= 12) return 'rainbow'
+    }
+    if (k === 'rainbow') return 'rainbow'
+  }
   for (const [re, id] of RARITY_MAP) {
     if (re.test(raw)) return id
   }
@@ -372,10 +391,10 @@ export function extractRarity(wt, fields) {
 }
 
 const TYPE_TO_KIND = [
-  [/武器|weapon/i, 'weapon'],
+  [/ツール|道具|tool|pickaxe|axe|hammer|hook|つるはし|ハンマー|ドリル/i, 'tool'],
   [/防具|armor|helmet|breastplate|greaves/i, 'armor'],
+  [/武器|weapon/i, 'weapon'],
   [/アクセサリ|accessory/i, 'accessory'],
-  [/ツール|道具|tool|pickaxe|axe|hammer|hook/i, 'tool'],
   [/ポーション|potion|食料|food/i, 'potion'],
   [/マウント|mount/i, 'mount'],
   [/ペット|pet|light pet/i, 'pet'],
@@ -386,9 +405,28 @@ const TYPE_TO_KIND = [
 
 export function extractKindFromType(wt, fallbackKind) {
   const fields = parseInfoboxFields(wt)
-  const type = fields.type || fields['type '] || ''
+  let typeRow = fields.type || fields['type '] || fields['種類'] || ''
+  if (!typeRow) {
+    const row = wt.match(/\|\s*(?:''')?(?:タイプ|種類)(?:''')?\s*\|\|?\s*([^\n|{]+)/i)
+    if (row) typeRow = row[1]
+  }
+  // Explicit infobox/table type wins (e.g. 種類=素材, タイプ=道具<br>近接武器)
+  if (typeRow) {
+    for (const [re, kind] of TYPE_TO_KIND) {
+      if (re.test(typeRow)) return kind
+    }
+  }
+  let hint = ''
+  const crumb = wt.match(/\{\{\s*パンくず\d?\s*\|([^}]+)\}\}/i)
+  if (crumb) hint = crumb[1]
+  if (/\]\]\s*>\s*\[\[翼\]\]|アクセサリー.?[>＞].?翼/.test(wt.slice(0, 2500))) {
+    hint = `${hint} 翼 accessory`
+  }
   for (const [re, kind] of TYPE_TO_KIND) {
-    if (re.test(type)) return kind
+    if (hint && re.test(hint)) return kind
+  }
+  if (/翼|wing/i.test(wt.slice(0, 2000)) && /アクセサリ|accessory|Category:Wing/i.test(wt)) {
+    return 'accessory'
   }
   return fallbackKind
 }
@@ -416,6 +454,7 @@ export function isBadDescription(desc, name) {
   if (/\bsubname\s*=|\bplaceable\s*=|\btype\s*=/i.test(d)) return true
   if (/Terrariaのアイテムです/.test(d)) return true
   if (/説明を準備中/.test(d)) return true
+  if (/^#(?:転送|redirect)/i.test(d)) return true
   if (name && d === `${name}。`) return true
   if (d.length < 10) return true
   return false
@@ -442,16 +481,20 @@ export function parseEntityText(wt, enName, fallbackKind) {
     }
   }
 
-  // Drop redundant "名前（ ）は、" lead once the name is known
+  // Drop redundant "名前（ ）は、" / "English Nameは" lead once the name is known
   if (name) {
     const esc = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     description = description
-      .replace(new RegExp(`^${esc}\\s*(?:（\\s*）|\\([^)]*\\))?\\s*は[、,]\\s*`), '')
+      .replace(new RegExp(`^${esc}\\s*(?:（\\s*）|\\([^)]*\\))?\\s*は[、,]?\\s*`), '')
       .replace(/^（\s*）は[、,]?\s*/, '')
       .replace(/^\([^)]{0,40}\)は[、,]?\s*/, '')
       .trim()
-    if (description && !/[。！？]$/.test(description)) description += '。'
   }
+  if (enName && name === enName) {
+    const escEn = enName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    description = description.replace(new RegExp(`^${escEn}\\s*は\\s*`), '').trim()
+  }
+  if (description && !/[。！？]$/.test(description)) description += '。'
 
   const rarity = extractRarity(wt, fields)
   const kind = extractKindFromType(wt, fallbackKind)

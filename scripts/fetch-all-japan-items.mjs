@@ -42,6 +42,8 @@ const HUBS = [
   { hub: 'メカニズム', kind: 'furniture' },
   { hub: 'Ores', kind: 'material' },
   { hub: 'Bars', kind: 'material' },
+  { hub: '翼', kind: 'accessory' },
+  { hub: 'Wings', kind: 'accessory' },
 ]
 
 const CATEGORIES = [
@@ -56,6 +58,8 @@ const CATEGORIES = [
   'Category:家具',
   'Category:素材',
   'Category:Treasure Bagから入手',
+  'Category:Wing',
+  'Category:道具',
 ]
 
 async function mw(params) {
@@ -96,7 +100,31 @@ function isLikelyEntityTitle(title) {
   if (/一覧|リスト|ガイド|テンプレート|カテゴリ|簡易一覧/.test(title)) return false
   if (!/^[A-Za-z0-9]/.test(title)) return false
   if (title.length > 70) return false
+  if (isJunkTitle(title)) return false
   return true
+}
+
+function matchRedirect(wt) {
+  if (!wt) return null
+  const m = wt.trim().match(/^#(?:redirect|転送)\s*\[\[([^\]|#]+)(?:[|#][^\]]*)?\]\]/i)
+  return m ? m[1].trim() : null
+}
+
+function isJunkTitle(title) {
+  return /^(Bleeding|Burning|Confused|Stoned|Venom|Poisoned|Cursed|Silenced|Darkness|Slow|Weak|Broken Armor|On Fire!|Frostburn|Mana|Star|Slime|Chest|Grass|Torch|Hooks|Minion|Modifier|Expert Mode|Master Mode|Journey Mode|Hardmode|Bestiary|Christmas Event|Halloween Event|Don't dig up|Developer items|Full Moon|New Moon|Lava|Bullets|Ogre|Get fixed boi)$/i.test(
+    title,
+  ) || /^\d+(\.\d+)+$/.test(title) || /\(debuff\)$/i.test(title)
+}
+
+async function resolvePage(title, depth = 0) {
+  const parsed = await parsePage(title)
+  const wt = parsed?.wikitext?.['*'] || ''
+  const redir = matchRedirect(wt)
+  if (redir && depth < 3) {
+    const next = await resolvePage(redir, depth + 1)
+    return { ...next, redirectChain: [redir, ...(next.redirectChain || [])] }
+  }
+  return { wt, redirectChain: [] }
 }
 
 async function collectLinksFromHub(hubTitle) {
@@ -225,16 +253,37 @@ async function main() {
       continue
     }
     try {
-      const parsed = await parsePage(title)
-      const wt = parsed?.wikitext?.['*'] || ''
-      if (!wt || /^#redirect/i.test(wt.trim())) {
-        redirects++
-        process.stdout.write('r')
+      const { wt, redirectChain } = await resolvePage(title)
+      if (!wt) {
+        fail++
+        process.stdout.write('!')
         continue
       }
-      const parsedText = parseEntityText(wt, title, kind)
+      if (redirectChain.length) {
+        redirects++
+        process.stdout.write('R')
+      }
+      // Armor/set pages: keep the original item title as English name
+      const parseAs = title
+      const parsedText = parseEntityText(wt, parseAs, kind)
       let name = parsedText.name
       if (looksLikeBadName(name)) name = title
+      // If we followed a redirect to a set/armor page, don't replace piece name with set name
+      if (
+        redirectChain.length &&
+        /(?:armor|set)$/i.test(redirectChain[redirectChain.length - 1] || '') &&
+        name !== title &&
+        !/[ぁ-んァ-ヶ一-龥]/.test(name)
+      ) {
+        name = title
+      }
+      if (
+        redirectChain.length &&
+        /(?:armor|set)$/i.test(redirectChain[redirectChain.length - 1] || '') &&
+        /鎧|セット|防具$/.test(name)
+      ) {
+        name = title
+      }
       entitiesById.set(id, {
         id,
         enName: title,
@@ -244,7 +293,11 @@ async function main() {
         progression: parsedText.progression,
         sprite: title,
         description: parsedText.description,
-        source: { japanWiki: title, wikitext: 'action=parse (same as action=edit)' },
+        source: {
+          japanWiki: title,
+          redirectTo: redirectChain[0] || undefined,
+          wikitext: 'action=parse (same as action=edit)',
+        },
       })
       ok++
       process.stdout.write('.')

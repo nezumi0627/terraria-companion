@@ -75,6 +75,14 @@ function isJunkEntity(e) {
     return true
   if (/^(Armor|Furniture|Walls|Blocks|Weapons|Tools|Accessories|Potions|Mounts|Pets|NPCs|Enemies|Bosses|Events|Biomes)$/i.test(en))
     return true
+  if (/^\d+(\.\d+)+$/.test(name) || /^\d+(\.\d+)+$/.test(en)) return true
+  if (/^(Full Moon|New Moon|Lava|Ogre|Bullets|Get fixed boi|Don't dig up)$/i.test(en)) return true
+  if (/\(debuff\)$/i.test(en)) return true
+  if (/\b(Biome|Shrine|Event|Invasion)$/i.test(en)) return true
+  if (/^(The Crimson|The Corruption|The Hallow|The Underworld|Mushroom Biome|Water|Third Quarter|Waxing Gibbous|Waning Gibbous|First Quarter)$/i.test(en))
+    return true
+  if (/^Underground (Jungle|Snow|Desert|Corruption|Crimson|Hallow)$/i.test(en)) return true
+  if (/^Cursed Inferno$|^Hellfire$|^Hemorrhage$/i.test(en)) return true
   return false
 }
 
