@@ -14,6 +14,7 @@ import {
   parseEntityText,
   looksLikeBadName,
   isBadDescription,
+  matchRedirectTarget,
 } from './lib/wiki-parse.mjs'
 
 const OUT = join(dirname(fileURLToPath(import.meta.url)), '..', 'data', 'wiki')
@@ -41,6 +42,13 @@ async function parseWikitext(title) {
     return json?.parse?.wikitext?.['*'] || ''
   }
   return ''
+}
+
+async function resolveWikitext(title, depth = 0) {
+  const wt = await parseWikitext(title)
+  const redir = matchRedirectTarget(wt)
+  if (redir && depth < 3) return resolveWikitext(redir, depth + 1)
+  return wt
 }
 
 function isJunkEntity(e) {
@@ -112,8 +120,8 @@ async function main() {
       }
 
       try {
-        const wt = await parseWikitext(title)
-        if (!wt || /^#redirect/i.test(wt.trim())) {
+        const wt = await resolveWikitext(title)
+        if (!wt) {
           if (looksLikeBadName(e.name)) e.name = e.enName || e.name
           if (isBadDescription(e.description, e.name)) {
             e.description = `${e.name || e.enName}に関する情報。`
@@ -125,7 +133,7 @@ async function main() {
         }
 
         const parsed = parseEntityText(wt, e.enName || title, e.kind)
-        e.name = parsed.name
+        e.name = looksLikeBadName(parsed.name) ? e.enName || parsed.name : parsed.name
         e.description = parsed.description
         e.rarity = parsed.rarity
         e.progression = parsed.progression

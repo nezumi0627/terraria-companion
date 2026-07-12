@@ -48,10 +48,13 @@ export function stripAllTemplates(text) {
   return t
 }
 
+const INFOBOX_RE =
+  /\{\{\s*(?:Item[_\s-]?Infobox2?|item\s*infobox|アイテム情報|Item\s+infobox\s+Weapon|Npc_Infobox|Enemy_Infobox|Boss_Infobox)/i
+
 /** Extract first matching item/npc/enemy infobox inner text. */
 export function extractInfoboxInner(wt) {
   if (!wt) return ''
-  const m = wt.match(/\{\{\s*(?:Item[_\s-]?Infobox2?|item\s*infobox|アイテム情報)/i)
+  const m = wt.match(INFOBOX_RE)
   if (!m || m.index == null) return ''
   const removed = removeTemplateAt(wt, m.index)
   return removed?.inner || ''
@@ -87,6 +90,31 @@ export function parseInfoboxFields(wt) {
   return fields
 }
 
+/** True when text reads like a prose sentence, not a display title. */
+export function looksLikeDescriptionSentence(text) {
+  const s = String(text || '').trim()
+  if (!s) return true
+  if (s.length > 28) return true
+  if (/[、，]/.test(s) && s.length > 12) return true
+  if (
+    /^(時間経過|最序盤|押しっぱなし|放物線|上手くいけば|持続中に|地形に|水流を|あらゆる|複数組み|他の矢|水中で|このバフ|あちらは|それを利用|騎乗アイテム|スロットの|多かった方|ハードモードの|オート攻撃|敵の防御|召喚武器と|その場合は|よく食べると|使用すると|各種\s)/.test(
+      s,
+    )
+  )
+    return true
+  if (
+    /(ことで解除|でオート攻撃|からでも獲得|と時間がリセット|を描いて落下|に触れると消滅|を連続で放つ|に変換して放つ|当たるとバウンド|ダメージを与えることも可能|物が釣れやすく|一定距離進むと消滅|の早い段階で入手|小型の弾を打ち出して|防御を\d+無視|射程が短くなる|マナとMinion|バフは.*持続|武器になる|弾を販売する|消耗品の製作|低空を飛ぶ|難易度によって変動)/.test(
+      s,
+    )
+  )
+    return true
+  if (/(する|される|できる|なる|可能|ない|いけば|ため|ので|ことも|からも|以内|以上|以下|持続|解除|変動|販売|使用|放つ|落下|接近|購入|入手|獲得|攻撃|効果|バウンド|変換|連続|無視|短く|長く)$/.test(s) && s.length > 10)
+    return true
+  const particles = (s.match(/[をがにのはでもとへやからまでより]/g) || []).length
+  if (particles >= 3 && s.length > 12) return true
+  return false
+}
+
 export function cleanName(s) {
   let v = String(s || '')
     .replace(/\{\{[^}]+\}\}/g, '')
@@ -99,6 +127,7 @@ export function cleanName(s) {
     .trim()
   if (!v || v === 'なし') return ''
   if (v.length > 36) return ''
+  if (looksLikeDescriptionSentence(v)) return ''
   if (/<br|<hr|耐性$|増加$|減少$|可能になる|無効化|向上する|召喚する$/i.test(v)) return ''
   if (/^(タイプ|ツールチップ|説明|情報|レア|売却|調査)/.test(v)) return ''
   if (/^(レアリティ|希少度|売却|調査|Item\s*ID)$/i.test(v)) return ''
@@ -113,6 +142,7 @@ export function looksLikeBadName(name) {
   if (!name) return true
   if (/<br|<hr|https?:|TrJpMod|\[\[|\]\]|\{\{/i.test(name)) return true
   if (name.length > 40) return true
+  if (looksLikeDescriptionSentence(name)) return true
   if (/耐性$|増加$|減少$|可能になる|無効化|向上する|を召喚|を放つ|を展開/.test(name)) return true
   if (/^(購入には|防御力は|または|例えば|かなり硬く|数少ない|設置すると|ワールド生成時)/.test(name))
     return true
@@ -131,87 +161,94 @@ export function looksLikeBadName(name) {
   return false
 }
 
-/**
- * Japanese display name from Japan Wiki wikitext
- * (https://terraria.arcenserv.info — same as action=edit source).
- * Prefer 「骨のグローブ{{日本語化1.4}}」 after {{パンくず…}}. Never 「ダメージは11」.
- */
-export function extractJaName(wt, enName) {
-  if (!wt) return enName
-  const fields = parseInfoboxFields(wt)
-  if (fields.subname) {
-    const v = cleanName(fields.subname)
-    if (v && /[ぁ-んァ-ヶ一-龥]/.test(v) && !looksLikeBadName(v)) return v
-  }
+/** Follow #redirect / #転送 to target page title (no section). */
+export function matchRedirectTarget(wt) {
+  if (!wt) return null
+  const m = wt.trim().match(/^#(?:redirect|転送|REDIRECT)\s*\[\[([^\]|#]+)(?:[|#][^\]]*)?\]\]/i)
+  return m ? m[1].trim() : null
+}
 
-  // {{パンくず2|…}} / {{パンくず3|…}}\n\n銅のつるはし (…訳) / 骨のグローブ{{日本語化1.4}}
-  const afterCrumb = wt.match(
-    /\{\{\s*パンくず\d?\s*[^{}]*\}\}\s*(?:\r?\n|<\s*br\s*\/?\s*>|\s)*([ぁ-んァ-ヶ一-龥々ーA-Za-z0-9「」『』・＝\-]+)(?:\s*[\(（][^\n]{0,120}[\)）])?(?:\s*\{\{日本語化[^}]*\}\})?/,
+/** Japanese name on {{BASEPAGENAME}}<br>ゆきだま style infobox headers. */
+function extractJaFromInfoboxHeader(wt) {
+  const m = wt.match(
+    /\{\{BASEPAGENAME\}\}\s*(?:<br\s*\/?>|\s)+([ぁ-んァ-ヶ一-龥々ー][ぁ-んァ-ヶ一-龥々ーA-Za-z0-9・＝\-「」]{0,24})/i,
   )
-  if (afterCrumb) {
-    const v = cleanName(afterCrumb[1])
-    if (v && /[ぁ-んァ-ヶ一-龥]/.test(v) && !looksLikeBadName(v)) return v
-  }
+  if (!m) return ''
+  return cleanName(m[1])
+}
 
-  // After wikitable |} then JP name + {{日本語化}} or <br>
-  const afterTable = wt.match(
-    /\|\}\s*(?:\{\{[^}]+\}\}\s*)*(?:\r?\n|\s)*([ぁ-んァ-ヶ一-龥々ー][ぁ-んァ-ヶ一-龥々ーA-Za-z0-9「」『』\s]{0,30}?)(?:\{\{日本語化[^}]*\}\}|\s*<br)/,
+/** Japanese name before {{日本語化…}} (Dart Rifle / Molotov / Shadowflame Bow pattern). */
+function extractJaFromNihongoka(wt) {
+  const m = wt.match(
+    /(?:^|[\n>]|(?:\[\[[^\]]+\]\]\s*[>＞]\s*\[\[[^\]]+\]\])\s*(?:<br\s*\/?>)?\s*)([ぁ-んァ-ヶ一-龥々ー][ぁ-んァ-ヶ一-龥々ーA-Za-z0-9「」『』・＝\-\s]{0,36}?)\s*\{\{\s*日本語化/,
   )
-  if (afterTable) {
-    const v = cleanName(afterTable[1])
-    if (v && /[ぁ-んァ-ヶ一-龥]/.test(v) && !looksLikeBadName(v)) return v
-  }
+  if (!m) return ''
+  return cleanName(m[1])
+}
 
-  // Common Japan Wiki lead: strip info table, then 「天使の翼。」 / 「アグレット (…訳)」 / 「王女。」
+/** Short standalone JP title line (天使の翼。 / 火炎瓶 + 日本語化 on next tokens). */
+function extractJaFromLeadLine(wt) {
   const body = wt
     .replace(/\{\|[\s\S]*?\|\}/, '\n')
     .replace(/\{\{\s*参照[^}]*\}\}/g, '\n')
     .replace(/\[\[[^\]]*\|([^\]]+)\]\]/g, '$1')
     .replace(/\[\[([^\]]+)\]\]/g, '$1')
   const leadName = body.match(
-    /(?:^|\n)\s*(?:[^\nぁ-んァ-ヶ一-龥]{0,40}\n+)*\s*([ぁ-んァ-ヶ一-龥々ー][ぁ-んァ-ヶ一-龥々ーA-Za-z0-9・＝\-「」]{0,24})\s*(?:\([^)\n]{0,90}\)|（[^）\n]{0,90}）)?\s*[。．]?\s*(?:\n|<br|$)/m,
+    /(?:^|\n)\s*(?:[^\nぁ-んァ-ヶ一-龥]{0,40}\n+)*\s*([ぁ-んァ-ヶ一-龥々ー][ぁ-んァ-ヶ一-龥々ーA-Za-z0-9・＝\-「」]{0,24})\s*(?:\{\{日本語化[^}]*\}\})?\s*(?:\([^)\n]{0,90}\)|（[^）\n]{0,90}）)?\s*[。．]?\s*(?:\n|<br|$)/m,
   )
-  if (leadName) {
-    const v = cleanName(leadName[1])
-    if (
-      v &&
-      /[ぁ-んァ-ヶ一-龥]/.test(v) &&
-      !looksLikeBadName(v) &&
-      !/^(情報|タイプ|説明|参照|レア|売却|調査|飛行時間|高さ|アクセサリー|アイテム|武器|防具)$/.test(v)
-    ) {
-      return v
-    }
+  if (!leadName) return ''
+  return cleanName(leadName[1])
+}
+
+/**
+ * Japanese display name from Japan Wiki wikitext
+ * (https://terraria.arcenserv.info — same as action=edit source).
+ * Prefer 「骨のグローブ{{日本語化1.4}}」 / 「{{BASEPAGENAME}}<br>ゆきだま」. Never description sentences.
+ */
+export function extractJaName(wt, enName) {
+  if (!wt) return enName
+  const fields = parseInfoboxFields(wt)
+  const candidates = []
+
+  const push = (raw) => {
+    const v = cleanName(raw)
+    if (v && !looksLikeBadName(v)) candidates.push(v)
   }
 
-  const localized = wt
-    .slice(0, 2500)
-    .match(
-      /(?:^|\n)\s*([ぁ-んァ-ヶ一-龥々ー][ぁ-んァ-ヶ一-龥々ーA-Za-z0-9「」『』・＝\-\s]{0,40}?)\s*\{\{\s*日本語化/,
-    )
-  if (localized) {
-    const v = cleanName(localized[1])
-    if (v && !looksLikeBadName(v)) return v
-  }
+  if (fields.subname) push(fields.subname)
+
+  push(extractJaFromInfoboxHeader(wt))
+
+  const afterCrumb = wt.match(
+    /\{\{\s*パンくず\d?\s*[^{}]*\}\}\s*(?:\r?\n|<\s*br\s*\/?\s*>|\s)*([ぁ-んァ-ヶ一-龥々ーA-Za-z0-9「」『』・＝\-]+)(?:\s*[\(（][^\n]{0,120}[\)）])?(?:\s*\{\{日本語化[^}]*\}\})?/,
+  )
+  if (afterCrumb) push(afterCrumb[1])
+
+  const afterTable = wt.match(
+    /\|\}\s*(?:\{\{[^}]+\}\}\s*)*(?:\r?\n|\s)*([ぁ-んァ-ヶ一-龥々ー][ぁ-んァ-ヶ一-龥々ーA-Za-z0-9「」『』\s]{0,30}?)(?:\{\{日本語化[^}]*\}\}|\s*<br)/,
+  )
+  if (afterTable) push(afterTable[1])
+
+  push(extractJaFromNihongoka(wt))
+  push(extractJaFromLeadLine(wt))
 
   const head = wt.slice(0, 1200)
   const base = head.match(/BASEPAGENAME\}\}\s*<br\s*\/?>\s*([^\n|{]+)/i)
-  if (base) {
-    const v = cleanName(base[1])
-    if (v && /[ぁ-んァ-ヶ一-龥]/.test(v) && !looksLikeBadName(v)) return v
-  }
+  if (base) push(base[1])
 
   const header = head.match(
     /![^|\n]*\|\s*\{\{BASEPAGENAME\}\}\s*<br\s*\/?>\s*([ぁ-んァ-ヶ一-龥][^\n|{']{0,40})/,
   )
-  if (header) {
-    const v = cleanName(header[1])
-    if (v && !looksLikeBadName(v)) return v
-  }
+  if (header) push(header[1])
 
   const bracket = head.match(/『([^』]{1,36})』/)
-  if (bracket) {
-    const v = cleanName(bracket[1])
-    if (v && /[ぁ-んァ-ヶ一-龥]/.test(v) && !looksLikeBadName(v)) return v
+  if (bracket) push(bracket[1])
+
+  for (const v of candidates) {
+    if (/[ぁ-んァ-ヶ一-龥]/.test(v)) return v
+  }
+  for (const v of candidates) {
+    if (!/[ぁ-んァ-ヶ一-龥]/.test(v) && v.length <= 24) return v
   }
 
   return enName
@@ -263,7 +300,7 @@ export function extractDescription(wt, name, enName) {
     .replace(/\{\{cc\|(\d+)\}\}/gi, '$1銅')
 
   // Remove main infobox first (brace-aware), then other templates
-  const box = body.match(/\{\{\s*(?:Item[_\s-]?Infobox2?|item\s*infobox|アイテム情報)/i)
+  const box = body.match(INFOBOX_RE)
   if (box && box.index != null) {
     const rem = removeTemplateAt(body, box.index)
     if (rem) body = rem.before + '\n' + rem.after
@@ -463,7 +500,8 @@ export function isBadDescription(desc, name) {
 /** Full parse for one wiki page. */
 export function parseEntityText(wt, enName, fallbackKind) {
   const nameRaw = extractJaName(wt, enName)
-  let name = looksLikeBadName(nameRaw) ? enName || nameRaw : nameRaw
+  let name = nameRaw
+  if (!name || looksLikeBadName(name)) name = enName || nameRaw || ''
   const fields = parseInfoboxFields(wt)
   let description = extractDescription(wt, name, enName)
   description = description.replace(/、\s*。/g, '、').replace(/。\s*。/g, '。')

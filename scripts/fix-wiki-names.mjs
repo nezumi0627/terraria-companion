@@ -7,6 +7,7 @@
 import { readdir, readFile, writeFile } from 'node:fs/promises'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { parseEntityText, matchRedirectTarget } from './lib/wiki-parse.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const OUT = join(__dirname, '..', 'data', 'wiki')
@@ -27,35 +28,11 @@ async function parseWikitext(title) {
   return json?.parse?.wikitext?.['*'] || ''
 }
 
-function extractJaName(wikitext, fallback) {
-  if (!wikitext) return fallback
-  const sub = wikitext.match(/\|\s*subname\s*=\s*([^\n|{]+)/i)
-  if (sub) {
-    const v = sub[1].trim()
-    if (v && v !== 'なし') return v
-  }
-  const bracket = wikitext.match(/『([^』]{1,40})』/)
-  if (bracket) return bracket[1].trim()
-  const mBox = wikitext.match(/BASEPAGENAME\}\}\s*<br>\s*([^\n|{]+)/)
-  if (mBox && /[ぁ-んァ-ヶ一-龥]/.test(mBox[1])) return mBox[1].trim()
-  return fallback
-}
-
-function extractLead(wikitext) {
-  if (!wikitext) return ''
-  let t = wikitext
-    .replace(/\{\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}\}/g, ' ')
-    .replace(/\[\[File:[^\]]+\]\]/gi, ' ')
-    .replace(/\[\[[^\]]*\|([^\]]+)\]\]/g, '$1')
-    .replace(/\[\[([^\]]+)\]\]/g, '$1')
-    .replace(/'{2,}/g, '')
-    .replace(/<!--[\s\S]*?-->/g, ' ')
-    .replace(/^\s*#redirect.*/i, '')
-    .replace(/\s+/g, ' ')
-    .trim()
-  if (!t || t.length < 12) return ''
-  const sentences = t.split(/(?<=[。．])\s+/).filter((s) => s.length > 16)
-  return (sentences[0] || t).slice(0, 360)
+async function resolveWikitext(title, depth = 0) {
+  const wt = await parseWikitext(title)
+  const redir = matchRedirectTarget(wt)
+  if (redir && depth < 3) return resolveWikitext(redir, depth + 1)
+  return wt
 }
 
 async function main() {
@@ -69,13 +46,15 @@ async function main() {
     for (const e of data.entities) {
       const title = e.source?.japanWiki || e.enName
       if (!title) continue
-      const wt = await parseWikitext(title)
-      if (!wt || /^#redirect/i.test(wt.trim())) continue
-      const name = extractJaName(wt, e.enName)
-      const description = extractLead(wt) || e.description
-      if (name !== e.name || description !== e.description) {
-        e.name = name
-        e.description = description
+      const wt = await resolveWikitext(title)
+      if (!wt || matchRedirectTarget(wt)) continue
+      const parsed = parseEntityText(wt, e.enName || title, e.kind)
+      if (parsed.name !== e.name || parsed.description !== e.description) {
+        e.name = parsed.name
+        e.description = parsed.description
+        e.rarity = parsed.rarity
+        e.progression = parsed.progression
+        if (parsed.kind) e.kind = parsed.kind
         fixed++
       }
       process.stdout.write('.')

@@ -10,7 +10,7 @@
 import { mkdir, writeFile, readFile, access } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { extractJaName, extractDescription, extractKindFromType, extractRarity, guessProgression } from './lib/wiki-parse.mjs'
+import { parseEntityText, matchRedirectTarget, looksLikeBadName } from './lib/wiki-parse.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = join(__dirname, '..')
@@ -76,13 +76,23 @@ async function exists(p) {
   }
 }
 
+async function resolvePage(title, depth = 0) {
+  const parsed = await parsePage(title)
+  const wt = parsed?.wikitext?.['*'] || ''
+  const redir = matchRedirectTarget(wt)
+  if (redir && depth < 3) {
+    const next = await resolvePage(redir, depth + 1)
+    return { ...next, redirectChain: [redir, ...(next.redirectChain || [])] }
+  }
+  return { parsed, wt, redirectChain: [] }
+}
+
 async function collectLinksFromHub(hubTitle) {
-  const parsed = await parsePage(hubTitle)
+  const { parsed, wt } = await resolvePage(hubTitle)
   if (!parsed) return { titles: [], redirectTo: null }
-  const wt = parsed.wikitext?.['*'] || ''
-  const redirect = wt.match(/^#redirect\s*\[\[([^\]]+)\]\]/i)
+  const redirect = matchRedirectTarget(wt)
   if (redirect) {
-    return collectLinksFromHub(redirect[1])
+    return collectLinksFromHub(redirect)
   }
   const titles = [...new Set((parsed.links || []).map((l) => l['*']).filter(isLikelyEntityTitle))]
   return { titles, redirectTo: null }
@@ -94,33 +104,33 @@ async function enrich(titles, kind) {
   console.log(`  enriching ${sample.length}/${titles.length} (${kind})…`)
   const entities = []
   for (const title of sample) {
-    const parsed = await parsePage(title)
-    const wt = parsed?.wikitext?.['*'] || ''
-    if (/^#redirect/i.test(wt.trim())) {
-      process.stdout.write('r')
+    const { wt, redirectChain } = await resolvePage(title)
+    if (!wt) {
+      process.stdout.write('!')
       continue
     }
-    const name = extractJaName(wt, title)
-    const description = extractDescription(wt, name, title)
-    const rarity = extractRarity(wt)
-    const kindResolved = extractKindFromType(wt, kind)
-    const progression = guessProgression(description, wt)
+    const parsed = parseEntityText(wt, title, kind)
+    let name = parsed.name
+    if (looksLikeBadName(name)) name = title
     const hp = extractInfoboxField(wt, 'HP') || extractInfoboxField(wt, '体力')
     const damage = extractInfoboxField(wt, 'damage') || extractInfoboxField(wt, '攻撃力')
     entities.push({
       id: slugify(title),
       enName: title,
       name,
-      kind: kindResolved,
-      rarity,
-      progression,
+      kind: parsed.kind || kind,
+      rarity: parsed.rarity,
+      progression: parsed.progression,
       sprite: title,
-      description,
+      description: parsed.description,
       hp,
       damage,
-      source: { japanWiki: title },
+      source: {
+        japanWiki: title,
+        redirectTo: redirectChain[0] || undefined,
+      },
     })
-    process.stdout.write('.')
+    process.stdout.write(redirectChain.length ? 'R' : '.')
   }
   process.stdout.write('\n')
   return entities

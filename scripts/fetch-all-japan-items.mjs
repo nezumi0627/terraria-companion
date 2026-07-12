@@ -9,7 +9,7 @@
 import { mkdir, writeFile, readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { parseEntityText, looksLikeBadName } from './lib/wiki-parse.mjs'
+import { parseEntityText, looksLikeBadName, matchRedirectTarget } from './lib/wiki-parse.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = join(__dirname, '..')
@@ -105,9 +105,7 @@ function isLikelyEntityTitle(title) {
 }
 
 function matchRedirect(wt) {
-  if (!wt) return null
-  const m = wt.trim().match(/^#(?:redirect|転送)\s*\[\[([^\]|#]+)(?:[|#][^\]]*)?\]\]/i)
-  return m ? m[1].trim() : null
+  return matchRedirectTarget(wt)
 }
 
 function isJunkTitle(title) {
