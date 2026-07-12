@@ -13,6 +13,7 @@ import {
   iconSrc,
   progressionLabel,
 } from "@/lib/data"
+import { getNpcHappiness, TIER_LABEL, type PrefTier } from "@/lib/data/npc-happiness"
 import { GlyphTile } from "@/components/common/glyph-tile"
 import { useStore } from "@/lib/store"
 import { useUi } from "@/lib/ui-store"
@@ -201,14 +202,105 @@ function BossDetails({ entity, onItem }: { entity: import("@/lib/data").Boss; on
 }
 
 function NpcDetails({ entity }: { entity: import("@/lib/data").Npc }) {
+  const openEntity = useUi((s) => s.openEntity)
+  const happiness = getNpcHappiness(entity.id)
+
+  const biomeRows: { label: string; id?: string }[] = []
+  if (happiness?.lovedBiome) biomeRows.push({ label: "大好きな環境", id: happiness.lovedBiome })
+  if (happiness?.likedBiome) biomeRows.push({ label: "好む環境", id: happiness.likedBiome })
+  if (happiness?.dislikedBiome) biomeRows.push({ label: "嫌う環境", id: happiness.dislikedBiome })
+
+  const neighborTiers: { tier: PrefTier; ids: string[] }[] = happiness
+    ? [
+        { tier: "loved", ids: happiness.lovedNpcs },
+        { tier: "liked", ids: happiness.likedNpcs },
+        { tier: "disliked", ids: happiness.dislikedNpcs },
+        { tier: "hated", ids: happiness.hatedNpcs },
+      ]
+    : []
+
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3">
       <Field label="解放条件" value={entity.unlock} />
-      <div className="grid grid-cols-2 gap-2">
-        <Field label="好む環境" value={entity.likedBiome} />
+
+      {happiness?.note ? (
+        <div className="rounded-xl border border-border bg-background/40 px-3 py-2 text-sm leading-relaxed text-muted-foreground">
+          {happiness.note}
+        </div>
+      ) : null}
+
+      {biomeRows.length > 0 ? (
+        <div>
+          <h3 className="mb-1.5 text-xs font-bold tracking-wide text-muted-foreground">バイオーム相性</h3>
+          <div className="flex flex-col gap-1.5">
+            {biomeRows.map((row) => {
+              const biome = row.id ? biomeMap.get(row.id) : undefined
+              if (!biome) {
+                return (
+                  <div key={row.label} className="rounded-lg bg-card/60 px-2 py-1.5 text-sm">
+                    <span className="text-muted-foreground">{row.label}：</span>
+                    {entity.likedBiome}
+                  </div>
+                )
+              }
+              return (
+                <button
+                  key={row.label}
+                  type="button"
+                  onClick={() => openEntity("biome", biome.id)}
+                  className="flex items-center gap-2.5 rounded-lg bg-card/60 px-2 py-1.5 text-left"
+                >
+                  <GlyphTile glyph={biome.glyph} color={biome.color} image={iconSrc(biome.id)} size={30} />
+                  <div className="min-w-0 flex-1">
+                    <div className="text-[11px] text-muted-foreground">{row.label}</div>
+                    <div className="truncate text-sm">{biome.name}</div>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-2">
+          <Field label="好む環境" value={entity.likedBiome} />
+          {entity.dislikedBiome ? <Field label="嫌う環境" value={entity.dislikedBiome} /> : null}
+        </div>
+      )}
+
+      {neighborTiers.some((t) => t.ids.length > 0) ? (
+        <div>
+          <h3 className="mb-1.5 text-xs font-bold tracking-wide text-muted-foreground">隣人相性</h3>
+          <div className="flex flex-col gap-2">
+            {neighborTiers.map(({ tier, ids }) => {
+              if (!ids.length) return null
+              return (
+                <div key={tier}>
+                  <div className="mb-1 text-[11px] text-muted-foreground">{TIER_LABEL[tier]}</div>
+                  <div className="flex flex-col gap-1">
+                    {ids.map((nid) => {
+                      const n = npcMap.get(nid)
+                      if (!n) return null
+                      return (
+                        <button
+                          key={nid}
+                          type="button"
+                          onClick={() => openEntity("npc", nid)}
+                          className="flex items-center gap-2.5 rounded-lg bg-card/60 px-2 py-1.5 text-left"
+                        >
+                          <GlyphTile glyph={n.glyph} color={n.color} image={iconSrc(n.id)} size={30} />
+                          <span className="flex-1 truncate text-sm">{n.name}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      ) : (
         <Field label="好む隣人" value={entity.likedNpc} />
-      </div>
-      {entity.dislikedBiome ? <Field label="嫌う環境" value={entity.dislikedBiome} /> : null}
+      )}
     </div>
   )
 }

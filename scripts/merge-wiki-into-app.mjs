@@ -78,19 +78,36 @@ function isJunkEntity(e) {
   return false
 }
 
+function entityQuality(e) {
+  const name = e?.name || ''
+  let score = 0
+  if (/[ぁ-んァ-ヶ一-龥]/.test(name)) score += 20
+  if (name && !/^(ダメージは|防御力は|ノックバックは)/.test(name) && !/ダメージは|難易度で変化/.test(name))
+    score += 10
+  if (e.description && String(e.description).length > 40) score += 3
+  if (e.enName) score += 1
+  return score
+}
+
 async function loadEntities() {
-  const files = (await readdir(WIKI)).filter((f) => f.endsWith('.json') && f !== 'index.json')
-  const all = []
-  const seen = new Set()
+  // Prefer all-items.json (full Japan Wiki refresh) over older hub snapshots.
+  const files = (await readdir(WIKI))
+    .filter((f) => f.endsWith('.json') && f !== 'index.json')
+    .sort((a, b) => {
+      if (a === 'all-items.json') return 1
+      if (b === 'all-items.json') return -1
+      return a.localeCompare(b)
+    })
+  const byId = new Map()
   for (const f of files) {
     const raw = JSON.parse(await readFile(join(WIKI, f), 'utf8'))
     for (const e of raw.entities || []) {
-      if (!e?.id || seen.has(e.id) || isJunkEntity(e)) continue
-      seen.add(e.id)
-      all.push(e)
+      if (!e?.id || isJunkEntity(e)) continue
+      const prev = byId.get(e.id)
+      if (!prev || entityQuality(e) >= entityQuality(prev)) byId.set(e.id, e)
     }
   }
-  return all
+  return [...byId.values()]
 }
 
 async function loadExistingIds() {

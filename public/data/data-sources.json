@@ -1,0 +1,29 @@
+{
+  "generatedAt": "2026-07-12T22:40:06.125Z",
+  "sources": [
+    {
+      "id": "japan-wiki",
+      "url": "https://terraria.arcenserv.info",
+      "use": "Japanese names & descriptions via MediaWiki wikitext (same as action=edit)",
+      "local": [
+        "data/wiki/*.json",
+        "public/data/wiki-*.json"
+      ]
+    },
+    {
+      "id": "npc-happiness",
+      "url": "https://github.com/synchromic/terraria-npc-happiness",
+      "use": "Town NPC biome/neighbor preference matrix (mirrored into lib/data/npc-happiness.ts)",
+      "local": [
+        "lib/data/npc-happiness.ts",
+        "public/data/npc-happiness.json"
+      ]
+    },
+    {
+      "id": "official-iteminfo",
+      "url": "https://terraria.wiki.gg/wiki/Module:Iteminfo/data",
+      "use": "Structured item stats from game source (English); optional future enrich — not bundled yet",
+      "local": []
+    }
+  ]
+}

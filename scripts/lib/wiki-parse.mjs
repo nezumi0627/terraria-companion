@@ -3,7 +3,7 @@
  * Used by rebuild / fetch / merge / clean-public scripts.
  *
  * Goals:
- * - Name ONLY from infobox subname / title header (never trivia 『』)
+ * - Name from |subname= / {{パンくず}}直後の日本語名{{日本語化}} (never trivia 『』 / ダメージは…)
  * - Description from tooltip JP + lead body prose (never raw |field= leftovers)
  * - Rarity / type / progression from infobox + body clues
  */
@@ -101,6 +101,10 @@ export function cleanName(s) {
   if (v.length > 36) return ''
   if (/<br|<hr|耐性$|増加$|減少$|可能になる|無効化|向上する|召喚する$/i.test(v)) return ''
   if (/^(タイプ|ツールチップ|説明|情報|レア|売却|調査)/.test(v)) return ''
+  if (/^(レアリティ|希少度|売却|調査|Item\s*ID)$/i.test(v)) return ''
+  if (/^ダメージは|^防御力は|^ノックバックは/.test(v)) return ''
+  if (/ダメージは|防御力は|ノックバックは|Armorを|難易度で変化/.test(v)) return ''
+  if (/^\d+$/.test(v)) return ''
   if (!/[ぁ-んァ-ヶ一-龥A-Za-z0-9]/.test(v)) return ''
   return v
 }
@@ -112,7 +116,11 @@ export function looksLikeBadName(name) {
   if (/耐性$|増加$|減少$|可能になる|無効化|向上する|を召喚|を放つ|を展開/.test(name)) return true
   if (/^(購入には|防御力は|または|例えば|かなり硬く|数少ない|設置すると|ワールド生成時)/.test(name))
     return true
-  // Trivia / culture false positives that used to come from first 『』
+  // 「ダメージメーター」等の正当な名前は残し、「ダメージは11」だけ弾く
+  if (/^ダメージは|^防御力は|^ノックバックは/.test(name)) return true
+  if (/ダメージは|防御力は|ノックバックは|難易度で変化|Armorを|相当$/.test(name)) return true
+  if (/^\d+(\.\d+)?$/.test(name)) return true
+  // Trivia / category false positives that used to come from first 『』
   if (
     /^(IT（イット）|サタデー・ナイト・ライブ|死ぬ|ピーター・パン|たまごっち|ドラえもん|ポケモン|マリオ)$/.test(
       name,
@@ -122,21 +130,73 @@ export function looksLikeBadName(name) {
   return false
 }
 
-/** Japanese display name — infobox first, never page-wide 『』 trivia. */
+/**
+ * Japanese display name from Japan Wiki wikitext
+ * (https://terraria.arcenserv.info — same as action=edit source).
+ * Prefer 「骨のグローブ{{日本語化1.4}}」 after {{パンくず…}}. Never 「ダメージは11」.
+ */
 export function extractJaName(wt, enName) {
   if (!wt) return enName
   const fields = parseInfoboxFields(wt)
   if (fields.subname) {
     const v = cleanName(fields.subname)
-    if (v && /[ぁ-んァ-ヶ一-龥]/.test(v)) return v
+    if (v && /[ぁ-んァ-ヶ一-龥]/.test(v) && !looksLikeBadName(v)) return v
   }
 
-  // Only search the header/infobox region (first ~1200 chars)
+  // {{パンくず2|…}}\n\n骨のグローブ{{日本語化1.4}}
+  const afterCrumb = wt.match(
+    /\{\{\s*パンくず[^{}]*\}\}\s*(?:\r?\n|\s)*([ぁ-んァ-ヶ一-龥々ーA-Za-z0-9「」『』]+)(?:\{\{日本語化[^}]*\}\})?/,
+  )
+  if (afterCrumb) {
+    const v = cleanName(afterCrumb[1])
+    if (v && /[ぁ-んァ-ヶ一-龥]/.test(v) && !looksLikeBadName(v)) return v
+  }
+
+  // After wikitable |} then JP name + {{日本語化}} or <br>
+  const afterTable = wt.match(
+    /\|\}\s*(?:\{\{[^}]+\}\}\s*)*(?:\r?\n|\s)*([ぁ-んァ-ヶ一-龥々ー][ぁ-んァ-ヶ一-龥々ーA-Za-z0-9「」『』\s]{0,30}?)(?:\{\{日本語化[^}]*\}\}|\s*<br)/,
+  )
+  if (afterTable) {
+    const v = cleanName(afterTable[1])
+    if (v && /[ぁ-んァ-ヶ一-龥]/.test(v) && !looksLikeBadName(v)) return v
+  }
+
+  // Common Japan Wiki lead: strip info table, then 「天使の翼。」 / 「アグレット (…訳)」 / 「王女。」
+  const body = wt
+    .replace(/\{\|[\s\S]*?\|\}/, '\n')
+    .replace(/\{\{\s*参照[^}]*\}\}/g, '\n')
+    .replace(/\[\[[^\]]*\|([^\]]+)\]\]/g, '$1')
+    .replace(/\[\[([^\]]+)\]\]/g, '$1')
+  const leadName = body.match(
+    /(?:^|\n)\s*(?:[^\nぁ-んァ-ヶ一-龥]{0,40}\n+)*\s*([ぁ-んァ-ヶ一-龥々ー][ぁ-んァ-ヶ一-龥々ーA-Za-z0-9・＝\-「」]{0,24})\s*(?:\([^)\n]{0,90}\)|（[^）\n]{0,90}）)?\s*[。．]?\s*(?:\n|<br|$)/m,
+  )
+  if (leadName) {
+    const v = cleanName(leadName[1])
+    if (
+      v &&
+      /[ぁ-んァ-ヶ一-龥]/.test(v) &&
+      !looksLikeBadName(v) &&
+      !/^(情報|タイプ|説明|参照|レア|売却|調査|飛行時間|高さ|アクセサリー|アイテム|武器|防具)$/.test(v)
+    ) {
+      return v
+    }
+  }
+
+  const localized = wt
+    .slice(0, 2500)
+    .match(
+      /(?:^|\n)\s*([ぁ-んァ-ヶ一-龥々ー][ぁ-んァ-ヶ一-龥々ーA-Za-z0-9「」『』・＝\-\s]{0,40}?)\s*\{\{\s*日本語化/,
+    )
+  if (localized) {
+    const v = cleanName(localized[1])
+    if (v && !looksLikeBadName(v)) return v
+  }
+
   const head = wt.slice(0, 1200)
   const base = head.match(/BASEPAGENAME\}\}\s*<br\s*\/?>\s*([^\n|{]+)/i)
   if (base) {
     const v = cleanName(base[1])
-    if (v && /[ぁ-んァ-ヶ一-龥]/.test(v)) return v
+    if (v && /[ぁ-んァ-ヶ一-龥]/.test(v) && !looksLikeBadName(v)) return v
   }
 
   const header = head.match(
@@ -144,10 +204,9 @@ export function extractJaName(wt, enName) {
   )
   if (header) {
     const v = cleanName(header[1])
-    if (v) return v
+    if (v && !looksLikeBadName(v)) return v
   }
 
-  // 『』 only inside the truncated header (not trivia sections)
   const bracket = head.match(/『([^』]{1,36})』/)
   if (bracket) {
     const v = cleanName(bracket[1])

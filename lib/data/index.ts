@@ -22,6 +22,7 @@ export { items as curatedItems } from './items'
 export { localSpriteUrl, wikiSpriteUrl } from './sprites'
 
 export { npcs, biomes, stations, events }
+export { getNpcHappiness, npcHappiness, TIER_LABEL } from './npc-happiness'
 
 /**
  * Runtime registries. Start with curated-only data so the first paint does not

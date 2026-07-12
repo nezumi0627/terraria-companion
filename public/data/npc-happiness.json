@@ -1,0 +1,39 @@
+{
+  "generatedAt": "2026-07-12T22:40:06.103Z",
+  "runtimeModule": "lib/data/npc-happiness.ts",
+  "preferenceSource": "https://github.com/synchromic/terraria-npc-happiness/blob/master/info.js",
+  "multipliersRef": {
+    "loved": 0.88,
+    "liked": 0.94,
+    "disliked": 1.06,
+    "hated": 1.12
+  },
+  "npcIds": [
+    "guide",
+    "merchant",
+    "zoologist",
+    "golfer",
+    "nurse",
+    "tavernkeep",
+    "party-girl",
+    "wizard",
+    "demolitionist",
+    "goblin-tinkerer",
+    "clothier",
+    "dye-trader",
+    "arms-dealer",
+    "steampunker",
+    "dryad",
+    "painter",
+    "witch-doctor",
+    "stylist",
+    "angler",
+    "pirate",
+    "mechanic",
+    "tax-collector",
+    "cyborg",
+    "santa-claus",
+    "truffle",
+    "princess"
+  ]
+}
