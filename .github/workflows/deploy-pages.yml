@@ -3,6 +3,8 @@ name: Deploy GitHub Pages
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'users/**'
   workflow_dispatch:
 
 permissions:
@@ -39,6 +41,7 @@ jobs:
         env:
           NEXT_PUBLIC_FEEDBACK_GITHUB_TOKEN: ${{ secrets.FEEDBACK_GITHUB_TOKEN }}
           NEXT_PUBLIC_FEEDBACK_DISPATCH_TOKEN: ${{ secrets.FEEDBACK_DISPATCH_TOKEN }}
+          NEXT_PUBLIC_GITHUB_DATA_TOKEN: ${{ secrets.GITHUB_DATA_TOKEN || secrets.FEEDBACK_GITHUB_TOKEN }}
           NEXT_PUBLIC_GITHUB_REPO: ${{ github.repository }}
         run: pnpm build
 

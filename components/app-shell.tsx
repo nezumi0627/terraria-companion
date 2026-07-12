@@ -13,6 +13,7 @@ import { SettingsScreen } from "@/components/screens/settings-screen"
 import { useUi } from "@/lib/ui-store"
 import { useStore } from "@/lib/store"
 import { useDataStatus } from "@/lib/data-status"
+import { CloudSyncHost } from "@/components/cloud-sync-host"
 
 export function AppShell() {
   const tab = useUi((s) => s.tab)
@@ -90,6 +91,7 @@ export function AppShell() {
 
       <OverlayHost />
       <BottomNav />
+      <CloudSyncHost />
     </div>
   )
 }

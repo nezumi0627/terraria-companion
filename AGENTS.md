@@ -68,13 +68,26 @@ Node サーバー起動（`pnpm start`）は静的エクスポート構成では
 - 説明文のサニタイズは `lib/sanitize-text.ts` と整合させる
 - `catalog.json` はツール用。アプリ UI からは参照しない
 
-## フィードバック（GitHub Issue）
+## クラウドログイン（ID + 数字4桁）
 
-- 設定画面のフォームから送信する
-- ビルド時に `FEEDBACK_GITHUB_TOKEN`（Issues: Write のみの fine-grained PAT）が Secrets にあれば、アプリから Issue を **直接作成**する
-- トークンが無い場合は、内容を埋めた GitHub「New issue」画面を開く（ユーザーが作成を押す）
-- Secret 設定: リポジトリ Settings → Secrets → `FEEDBACK_GITHUB_TOKEN`
-- ラベル `feedback` / `bug` / `enhancement` を使う
+- 設定 → アカウントで **新規登録 / ログイン**
+- 認証情報: **ID（英数字 3〜24）** + **数字4桁**
+- 保存先: リポジトリ内 `users/{id}.json`（GitHub Contents API で commit）
+- PIN は SHA-256 ハッシュのみ保存（生の4桁はファイルに書かない）
+- 未ログイン時は従来どおり端末の IndexedDB
+- ログイン中は変更をデバウンスしてクラウドへ同期（`CloudSyncHost`）
+- `users/**` だけの変更では Pages を再デプロイしない（`paths-ignore`）
+
+### 必要な Secret
+
+| Secret | 用途 |
+| --- | --- |
+| `GITHUB_DATA_TOKEN` | Contents: Write（`users/` の作成・更新）。未設定なら `FEEDBACK_GITHUB_TOKEN` を流用 |
+| `FEEDBACK_GITHUB_TOKEN` | Issue 作成 / 上記のフォールバック |
+
+fine-grained PAT は対象リポジトリのみ・**Contents: Read and write**（Feedback 兼用なら Issues: Write も）に限定すること。フル権限トークンを `NEXT_PUBLIC_*` に入れない。
+
+公開リポジトリのため、進行 JSON 自体は誰でも読めます（簡易クラウド用途の前提）。
 
 ## GitHub Pages
 

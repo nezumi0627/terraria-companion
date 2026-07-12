@@ -4,6 +4,7 @@ import { useRef, useState } from "react"
 import { Download, Upload, Trash2, Moon, Sun, Bell, Share2, Info, Plus, Pencil, RotateCcw, ListChecks, ExternalLink } from "lucide-react"
 import { useStore } from "@/lib/store"
 import { cn } from "@/lib/utils"
+import { AuthPanel } from "@/components/screens/auth-panel"
 import { FeedbackForm } from "@/components/screens/feedback-form"
 import { FEEDBACK_REPO } from "@/lib/feedback"
 
@@ -264,6 +265,10 @@ export function SettingsScreen() {
             </div>
           </div>
         )}
+      </Group>
+
+      <Group title="アカウント">
+        <AuthPanel onFlash={flash} />
       </Group>
 
       <Group title="フィードバック">

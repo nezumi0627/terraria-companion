@@ -352,9 +352,49 @@ function sanitizeImport(data: unknown): Partial<AppState> | null {
   if (goals) patch.goals = goals
   const dailyTasks = asDailyTasks(data.dailyTasks)
   if (dailyTasks) patch.dailyTasks = dailyTasks
+  const dailyChecked = asBoolRecord(data.dailyChecked)
+  if (dailyChecked) patch.dailyChecked = dailyChecked
+  if (typeof data.dailyDate === 'string') patch.dailyDate = data.dailyDate
+  if (Array.isArray(data.recentSearches)) {
+    patch.recentSearches = data.recentSearches.filter((x): x is string => typeof x === 'string').slice(0, 10)
+  }
+  if (Array.isArray(data.recentViews)) {
+    const views: RecentView[] = []
+    for (const v of data.recentViews) {
+      if (!isPlainObject(v)) continue
+      if (typeof v.kind !== 'string' || typeof v.id !== 'string') continue
+      if (typeof v.at !== 'number') continue
+      views.push({ kind: v.kind as FavKind, id: v.id, at: v.at })
+      if (views.length >= 20) break
+    }
+    if (views.length) patch.recentViews = views
+  }
   if (data.theme === 'dark' || data.theme === 'light') patch.theme = data.theme
   if (typeof data.notifications === 'boolean') patch.notifications = data.notifications
   return Object.keys(patch).length ? patch : null
+}
+
+/** Snapshot of progress/settings suitable for cloud user files. */
+export function exportProgressSnapshot(s: AppState): Record<string, unknown> {
+  return {
+    owned: s.owned,
+    defeatedBosses: s.defeatedBosses,
+    unlockedNpcs: s.unlockedNpcs,
+    completedEvents: s.completedEvents,
+    visitedBiomes: s.visitedBiomes,
+    builtStations: s.builtStations,
+    craftedItems: s.craftedItems,
+    collected: s.collected,
+    goals: s.goals,
+    favorites: s.favorites,
+    recentSearches: s.recentSearches,
+    recentViews: s.recentViews,
+    dailyTasks: s.dailyTasks,
+    dailyDate: s.dailyDate,
+    dailyChecked: s.dailyChecked,
+    theme: s.theme,
+    notifications: s.notifications,
+  }
 }
 
 export function applyTheme(t: 'dark' | 'light') {
