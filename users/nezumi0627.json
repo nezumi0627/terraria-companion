@@ -1,7 +1,7 @@
 {
   "id": "nezumi0627",
   "pinHash": "8f85d66000972c4a741f930c122227e60fee5c453d7e1b373e229834f76e8d76",
-  "updatedAt": 1783894569521,
+  "updatedAt": 1783894577954,
   "state": {
     "owned": {},
     "defeatedBosses": {},
@@ -18,7 +18,12 @@
       {
         "kind": "item",
         "id": "zenith",
-        "at": 1783894566739
+        "at": 1783894574898
+      },
+      {
+        "kind": "station",
+        "id": "mythril-anvil",
+        "at": 1783894572415
       },
       {
         "kind": "item",
