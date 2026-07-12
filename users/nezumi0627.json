@@ -1,7 +1,7 @@
 {
   "id": "nezumi0627",
   "pinHash": "8f85d66000972c4a741f930c122227e60fee5c453d7e1b373e229834f76e8d76",
-  "updatedAt": 1783900301102,
+  "updatedAt": 1783900306796,
   "state": {
     "owned": {},
     "defeatedBosses": {},
@@ -21,6 +21,11 @@
       "ガイド"
     ],
     "recentViews": [
+      {
+        "kind": "item",
+        "id": "bone-glove",
+        "at": 1783900303951
+      },
       {
         "kind": "item",
         "id": "empress-wings",
@@ -95,11 +100,6 @@
         "kind": "station",
         "id": "mythril-anvil",
         "at": 1783894572415
-      },
-      {
-        "kind": "item",
-        "id": "bone-glove",
-        "at": 1783894563660
       },
       {
         "kind": "item",
