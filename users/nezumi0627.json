@@ -1,7 +1,7 @@
 {
   "id": "nezumi0627",
   "pinHash": "8f85d66000972c4a741f930c122227e60fee5c453d7e1b373e229834f76e8d76",
-  "updatedAt": 1783897741325,
+  "updatedAt": 1783897747669,
   "state": {
     "owned": {},
     "defeatedBosses": {},
@@ -24,7 +24,7 @@
       {
         "kind": "item",
         "id": "wooden-sword",
-        "at": 1783897738534
+        "at": 1783897744718
       },
       {
         "kind": "item",
