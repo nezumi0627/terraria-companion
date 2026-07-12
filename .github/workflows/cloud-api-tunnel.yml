@@ -87,12 +87,20 @@ jobs:
           printf '%s\n' "{\"url\":\"$TUNNEL_URL\",\"updatedAt\":$(date +%s000),\"source\":\"actions-tunnel\"}" > public/cloud-api-url.json
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git pull --rebase origin main || git pull --rebase --autostash origin main
           git add public/cloud-api-url.json
           if git diff --staged --quiet; then
             echo "URL unchanged"
           else
             git commit -m "chore(cloud): refresh API tunnel URL"
-            git push
+            for i in 1 2 3; do
+              if git push origin HEAD; then
+                exit 0
+              fi
+              echo "push conflict, rebase retry $i"
+              git pull --rebase origin main
+            done
+            exit 1
           fi
 
       - name: Cancel previous tunnel runs
