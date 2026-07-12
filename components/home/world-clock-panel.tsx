@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Cloud, Moon, Sun } from 'lucide-react'
 import { useAuth } from '@/lib/auth-store'
 import { cn } from '@/lib/utils'
 
@@ -9,14 +8,15 @@ function pad(n: number) {
   return String(n).padStart(2, '0')
 }
 
-function phase(h: number): { label: string; Icon: typeof Sun; tone: string } {
-  if (h >= 5 && h < 11) return { label: '朝', Icon: Sun, tone: 'text-gold' }
-  if (h >= 11 && h < 17) return { label: '昼', Icon: Sun, tone: 'text-gold' }
-  if (h >= 17 && h < 20) return { label: '夕暮れ', Icon: Cloud, tone: 'text-copper' }
-  return { label: '夜', Icon: Moon, tone: 'text-magic' }
+function phaseLabel(h: number) {
+  if (h >= 5 && h < 11) return '朝の世界'
+  if (h >= 11 && h < 17) return '昼の世界'
+  if (h >= 17 && h < 20) return '夕暮れの世界'
+  return '夜の世界'
 }
 
-export function WorldClockPanel({ className }: { className?: string }) {
+/** Full-bleed screensaver: text only over ambient sky / grass — no cards. */
+export function WorldClockScreensaver({ className }: { className?: string }) {
   const userId = useAuth((s) => s.userId)
   const [now, setNow] = useState(() => new Date())
 
@@ -26,9 +26,9 @@ export function WorldClockPanel({ className }: { className?: string }) {
   }, [])
 
   const h = now.getHours()
-  const { label, Icon, tone } = phase(h)
   const date = now.toLocaleDateString('ja-JP', {
-    weekday: 'short',
+    weekday: 'long',
+    year: 'numeric',
     month: 'long',
     day: 'numeric',
   })
@@ -36,29 +36,33 @@ export function WorldClockPanel({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        'relative flex h-full min-h-[70dvh] flex-col justify-between px-1 py-2',
+        'relative flex min-h-[100dvh] flex-col items-center justify-center px-2 text-center',
+        'pt-[max(env(safe-area-inset-top),0.5rem)] pb-16',
         className,
       )}
     >
-      <div className="rounded-2xl border border-white/10 bg-black/25 px-4 py-3 backdrop-blur-[2px]">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Icon className={cn('size-3.5', tone)} />
-          <span>{label}の世界</span>
-          {userId && <span className="ml-auto truncate text-grass">@{userId}</span>}
-        </div>
-        <div className="mt-3 font-display text-[3.25rem] leading-none tracking-wide text-glow-gold tabular-nums">
-          {pad(h)}
-          <span className="animate-pulse text-gold/80">:</span>
-          {pad(now.getMinutes())}
-        </div>
-        <div className="mt-1 font-display text-lg text-muted-foreground/90 tabular-nums">
-          {pad(now.getSeconds())}
-          <span className="ml-2 text-sm font-sans tracking-normal">{date}</span>
-        </div>
-      </div>
+      <p className="text-sm tracking-[0.2em] text-muted-foreground/90">{phaseLabel(h)}</p>
 
-      <p className="rounded-xl border border-white/5 bg-black/20 px-3 py-2 text-[11px] leading-relaxed text-muted-foreground backdrop-blur-[1px]">
-        背景の空・星・草原はここに広がっています。左右にスワイプしてダッシュボードや目標へ戻れます。
+      <p className="mt-6 font-display text-[4.75rem] leading-none tracking-wide text-glow-gold tabular-nums sm:text-[5.5rem]">
+        {pad(h)}
+        <span className="text-gold/70">:</span>
+        {pad(now.getMinutes())}
+      </p>
+
+      <p className="mt-3 font-display text-2xl tabular-nums text-foreground/70">
+        {pad(now.getSeconds())}
+      </p>
+
+      <p className="mt-8 text-sm text-muted-foreground/85">{date}</p>
+
+      {userId ? (
+        <p className="mt-3 text-xs text-grass/90">{userId}</p>
+      ) : (
+        <p className="mt-3 text-xs text-muted-foreground/70">テラリア コンパニオン</p>
+      )}
+
+      <p className="mt-16 text-[11px] tracking-wide text-muted-foreground/55">
+        右へスワイプでホームへ
       </p>
     </div>
   )

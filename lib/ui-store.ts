@@ -37,11 +37,14 @@ interface UiState {
   openGoal: (id: string) => void
   back: () => void
   closeAll: () => void
+  /** Home swipe: immersive clock over ambient background */
+  screensaver: boolean
+  setScreensaver: (v: boolean) => void
 }
 
 export const useUi = create<UiState>((set) => ({
   tab: 'home',
-  setTab: (t) => set({ tab: t, stack: [] }),
+  setTab: (t) => set({ tab: t, stack: [], screensaver: false }),
   stack: [],
   openItem: (id) => set((s) => ({ stack: pushOverlay(s.stack, { type: 'item', id }) })),
   openEntity: (kind, id) =>
@@ -49,4 +52,6 @@ export const useUi = create<UiState>((set) => ({
   openGoal: (id) => set((s) => ({ stack: pushOverlay(s.stack, { type: 'goal', id }) })),
   back: () => set((s) => ({ stack: s.stack.slice(0, -1) })),
   closeAll: () => set({ stack: [] }),
+  screensaver: false,
+  setScreensaver: (v) => set({ screensaver: v }),
 }))

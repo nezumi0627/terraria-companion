@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { cn } from '@/lib/utils'
 
 function makeRng(seed: number) {
   let a = seed
@@ -17,7 +18,7 @@ function makeRng(seed: number) {
  * Terraria-inspired living backdrop. Particle counts drop under reduced-motion
  * and on narrow viewports for smoother scrolling on mobile Safari.
  */
-export function AmbientBackground() {
+export function AmbientBackground({ immersive = false }: { immersive?: boolean }) {
   const [mode, setMode] = useState<{ reduced: boolean; compact: boolean }>({
     reduced: false,
     compact: true,
@@ -43,7 +44,7 @@ export function AmbientBackground() {
   const { reduced, compact } = mode
 
   const stars = useMemo(() => {
-    const n = reduced ? 0 : compact ? 14 : 24
+    const n = reduced ? 0 : immersive ? (compact ? 22 : 36) : compact ? 14 : 24
     const rand = makeRng(91)
     return Array.from({ length: n }).map((_, i) => ({
       id: i,
@@ -54,10 +55,10 @@ export function AmbientBackground() {
       duration: 2.2 + rand() * 3.5,
       opacity: 0.35 + rand() * 0.55,
     }))
-  }, [reduced, compact])
+  }, [reduced, compact, immersive])
 
   const clouds = useMemo(() => {
-    const n = reduced ? 2 : compact ? 3 : 5
+    const n = reduced ? 2 : immersive ? (compact ? 4 : 6) : compact ? 3 : 5
     const rand = makeRng(404)
     return Array.from({ length: n }).map((_, i) => ({
       id: i,
@@ -66,13 +67,13 @@ export function AmbientBackground() {
       height: 22 + rand() * 28,
       delay: -rand() * 40,
       duration: 48 + rand() * 40,
-      opacity: 0.08 + rand() * 0.1,
+      opacity: immersive ? 0.12 + rand() * 0.12 : 0.08 + rand() * 0.1,
       scale: 0.7 + rand() * 0.6,
     }))
-  }, [reduced, compact])
+  }, [reduced, compact, immersive])
 
   const motes = useMemo(() => {
-    const n = reduced ? 0 : compact ? 8 : 14
+    const n = reduced ? 0 : immersive ? (compact ? 12 : 18) : compact ? 8 : 14
     const rand = makeRng(1337)
     return Array.from({ length: n }).map((_, i) => {
       const size = 2 + rand() * 4
@@ -86,10 +87,10 @@ export function AmbientBackground() {
         gold: rand() > 0.45,
       }
     })
-  }, [reduced, compact])
+  }, [reduced, compact, immersive])
 
   const blades = useMemo(() => {
-    const n = reduced ? 12 : compact ? 20 : 28
+    const n = reduced ? 12 : immersive ? (compact ? 28 : 36) : compact ? 20 : 28
     const rand = makeRng(4242)
     return Array.from({ length: n }).map((_, i) => ({
       id: i,
@@ -98,10 +99,16 @@ export function AmbientBackground() {
       delay: -rand() * 4,
       duration: 3.2 + rand() * 2.8,
     }))
-  }, [reduced, compact])
+  }, [reduced, compact, immersive])
 
   return (
-    <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden contain-strict">
+    <div
+      aria-hidden
+      className={cn(
+        'pointer-events-none fixed inset-0 -z-10 overflow-hidden contain-strict transition-opacity duration-500',
+        immersive && 'ambient-immersive',
+      )}
+    >
       <div className="absolute inset-0 terraria-sky" />
       <div className="absolute left-[18%] top-[8%] h-28 w-28 rounded-full blur-2xl terraria-sun" />
 
@@ -161,7 +168,7 @@ export function AmbientBackground() {
         />
       ))}
 
-      <div className="absolute bottom-0 left-0 right-0 h-[11%]">
+      <div className={cn('absolute bottom-0 left-0 right-0', immersive ? 'h-[14%]' : 'h-[11%]')}>
         <div
           className="absolute inset-x-0 bottom-0 h-full"
           style={{
@@ -171,7 +178,12 @@ export function AmbientBackground() {
         />
       </div>
 
-      <div className="absolute bottom-[8%] left-0 right-0 flex items-end justify-between px-0.5 opacity-55">
+      <div
+        className={cn(
+          'absolute left-0 right-0 flex items-end justify-between px-0.5',
+          immersive ? 'bottom-[11%] opacity-75' : 'bottom-[8%] opacity-55',
+        )}
+      >
         {blades.map((b) => (
           <span
             key={b.id}

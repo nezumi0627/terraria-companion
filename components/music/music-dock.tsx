@@ -30,6 +30,7 @@ import {
   type MusicMood,
   type MusicTrack,
 } from '@/lib/music-tracks'
+import { useUi } from '@/lib/ui-store'
 import { haptic } from '@/lib/haptics'
 import { cn } from '@/lib/utils'
 
@@ -59,6 +60,7 @@ export function MusicDock() {
   const expanded = useMusic((s) => s.expanded)
   const toggleExpanded = useMusic((s) => s.toggleExpanded)
   const setExpanded = useMusic((s) => s.setExpanded)
+  const screensaver = useUi((s) => s.screensaver)
   const currentId = useMusic((s) => s.currentId)
   const playing = useMusic((s) => s.playing)
   const progress = useMusic((s) => s.progress)
@@ -98,6 +100,10 @@ export function MusicDock() {
   useEffect(() => {
     void hydrateLibrary()
   }, [hydrateLibrary])
+
+  useEffect(() => {
+    if (screensaver) setExpanded(false)
+  }, [screensaver, setExpanded])
 
   useEffect(() => {
     bindAudio(audioRef.current)
@@ -157,10 +163,18 @@ export function MusicDock() {
         }}
       />
 
-      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-[45] mx-auto w-full max-w-md px-3 landscape:max-w-5xl">
+      <div
+        className={cn(
+          'pointer-events-none fixed inset-x-0 bottom-0 z-[45] mx-auto w-full max-w-md px-3 landscape:max-w-5xl',
+          'transition-all duration-300',
+          screensaver && 'translate-y-[120%] opacity-0',
+        )}
+      >
         <div
-          className="pointer-events-auto mb-[calc(4.75rem+env(safe-area-inset-bottom,0px))]"
-          style={{ paddingBottom: 0 }}
+          className={cn(
+            'pointer-events-auto mb-[calc(var(--chrome-nav)+env(safe-area-inset-bottom,0px))]',
+            screensaver && 'pointer-events-none',
+          )}
         >
           <AnimatePresence initial={false}>
             {expanded && (
@@ -172,7 +186,7 @@ export function MusicDock() {
                 transition={{ type: 'spring', stiffness: 380, damping: 32 }}
                 className="mb-2 overflow-hidden"
               >
-                <div className="glass max-h-[min(58dvh,420px)] overflow-hidden rounded-2xl border border-border shadow-[0_12px_40px_-12px_rgba(0,0,0,0.75)]">
+                <div className="glass max-h-[min(48dvh,360px)] overflow-hidden rounded-2xl border border-border shadow-[0_12px_40px_-12px_rgba(0,0,0,0.75)]">
                   <div className="flex items-center justify-between gap-2 border-b border-border/60 px-3 py-2">
                     <div className="min-w-0">
                       <div className="text-xs font-bold">ゲーム内 BGM</div>
@@ -375,7 +389,7 @@ export function MusicDock() {
             )}
           </AnimatePresence>
 
-          {/* Mini bar — grows from above bottom nav */}
+          {/* Mini bar — sits above bottom nav without overlapping content */}
           <motion.div
             layout
             className="glass overflow-hidden rounded-2xl border border-border shadow-[0_8px_28px_-10px_rgba(0,0,0,0.7)]"
@@ -387,12 +401,12 @@ export function MusicDock() {
                 haptic('light')
                 toggleExpanded()
               }}
-              className="flex w-full items-center justify-center py-1 text-muted-foreground"
+              className="flex w-full items-center justify-center pb-0.5 pt-1.5 text-muted-foreground"
             >
               <span className="h-1 w-8 rounded-full bg-muted-foreground/35" />
             </button>
 
-            <div className="flex items-center gap-1.5 px-2 pb-2 pt-0">
+            <div className="flex items-center gap-1 px-2 pb-1.5">
               <button
                 type="button"
                 onClick={() => {
@@ -468,7 +482,7 @@ export function MusicDock() {
               </button>
             </div>
 
-            <div className="px-3 pb-2">
+            <div className="px-3 pb-1.5">
               <input
                 type="range"
                 min={0}

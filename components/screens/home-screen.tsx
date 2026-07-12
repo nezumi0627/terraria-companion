@@ -9,7 +9,7 @@ import { useStore, goalProgress, overallProgress } from '@/lib/store'
 import { useUi } from '@/lib/ui-store'
 import { useAuth } from '@/lib/auth-store'
 import { useDataStatus } from '@/lib/data-status'
-import { WorldClockPanel } from '@/components/home/world-clock-panel'
+import { WorldClockScreensaver } from '@/components/home/world-clock-panel'
 import { haptic } from '@/lib/haptics'
 import { cn } from '@/lib/utils'
 
@@ -31,7 +31,8 @@ function avatarLetter(id: string) {
   return id.slice(0, 1).toUpperCase()
 }
 
-const PAGE_LABELS = ['世界', 'ホーム', '目標'] as const
+/** 0 = screensaver, 1 = home */
+const PAGE_LABELS = ['世界', 'ホーム'] as const
 
 export function HomeScreen() {
   const store = useStore()
@@ -43,6 +44,7 @@ export function HomeScreen() {
   const defeated = useStore((s) => s.defeatedBosses)
   const setTab = useUi((s) => s.setTab)
   const openGoal = useUi((s) => s.openGoal)
+  const setScreensaver = useUi((s) => s.setScreensaver)
   const dataVersion = useDataStatus((s) => s.version)
   const userId = useAuth((s) => s.userId)
   const syncing = useAuth((s) => s.syncing)
@@ -65,7 +67,6 @@ export function HomeScreen() {
   const nextBoss = timelineBosses.find((b) => !defeated[b.id])
   const defeatedCount = timelineBosses.filter((b) => defeated[b.id]).length
 
-  // Measure pager width in px — flex % basis is unreliable for horizontal scroll
   useEffect(() => {
     const el = pagerRef.current
     if (!el) return
@@ -79,7 +80,6 @@ export function HomeScreen() {
     return () => ro.disconnect()
   }, [])
 
-  // Land on center page once width is known
   useEffect(() => {
     const el = pagerRef.current
     if (!el || pageWidth <= 0) return
@@ -89,7 +89,6 @@ export function HomeScreen() {
       didCenter.current = true
       return
     }
-    // Keep current page index when width changes (rotate / resize)
     el.scrollLeft = page * pageWidth
   }, [pageWidth])
 
@@ -102,7 +101,7 @@ export function HomeScreen() {
       ticking = true
       requestAnimationFrame(() => {
         const w = el.clientWidth || 1
-        const next = Math.max(0, Math.min(2, Math.round(el.scrollLeft / w)))
+        const next = Math.max(0, Math.min(1, Math.round(el.scrollLeft / w)))
         setPage((prev) => {
           if (prev !== next) haptic('selection')
           return next
@@ -114,12 +113,16 @@ export function HomeScreen() {
     return () => el.removeEventListener('scroll', onScroll)
   }, [])
 
+  useEffect(() => {
+    setScreensaver(page === 0)
+    return () => setScreensaver(false)
+  }, [page, setScreensaver])
+
   const scrollToPage = (i: number) => {
     const el = pagerRef.current
     if (!el) return
     haptic('light')
-    const w = el.clientWidth
-    el.scrollTo({ left: i * w, behavior: 'smooth' })
+    el.scrollTo({ left: i * el.clientWidth, behavior: 'smooth' })
   }
 
   const header = (
@@ -175,14 +178,10 @@ export function HomeScreen() {
           </button>
         )}
       </div>
-      {userId && (
-        <p className="mt-1.5 text-[11px] text-muted-foreground">
-          {syncing ? 'クラウドへ同期中…' : 'クラウド同期オン · 左右スワイプで世界時計 / 目標'}
-        </p>
-      )}
-      {!userId && (
-        <p className="mt-1.5 text-[11px] text-muted-foreground">左右にスワイプ · 世界の空と時計 / 目標ボード</p>
-      )}
+      <p className="mt-1.5 text-[11px] text-muted-foreground">
+        {userId && (syncing ? 'クラウドへ同期中… · ' : 'クラウド同期オン · ')}
+        左スワイプで世界時計
+      </p>
     </header>
   )
 
@@ -371,98 +370,68 @@ export function HomeScreen() {
     </section>
   )
 
-  const dots = (
-    <div className="pointer-events-auto flex items-center justify-center gap-2 py-2 landscape:hidden">
-      {PAGE_LABELS.map((label, i) => (
-        <button
-          key={label}
-          type="button"
-          aria-label={label}
-          aria-current={page === i}
-          onClick={() => scrollToPage(i)}
-          className={cn(
-            'rounded-full transition-all',
-            page === i ? 'h-1.5 w-5 bg-grass' : 'size-1.5 bg-muted-foreground/40',
-          )}
-        />
-      ))}
+  const homeBody = (
+    <div className="flex flex-col gap-5">
+      {header}
+      {progressCard}
+      {goalsSection}
+      {dailySection}
     </div>
   )
 
   return (
     <div className="flex flex-col gap-2">
-      {/* Landscape: always-visible world + dashboard + goals */}
-      <div className="hidden landscape:grid landscape:grid-cols-[minmax(200px,0.9fr)_minmax(0,1.4fr)_minmax(220px,1fr)] landscape:gap-3 landscape:items-start">
-        <div className="sticky top-0 rounded-2xl border border-white/10 bg-black/20 p-2 backdrop-blur-[2px]">
-          <WorldClockPanel className="min-h-[50dvh]" />
-        </div>
-        <div className="flex flex-col gap-4">
-          {header}
-          {progressCard}
-          {dailySection}
-        </div>
-        <div className="flex flex-col gap-3">{goalsSection}</div>
-      </div>
+      {/* Landscape: normal dashboard only */}
+      <div className="hidden landscape:block">{homeBody}</div>
 
-      {/* Portrait: horizontal snap pages (世界 | ホーム | 目標) */}
+      {/* Portrait: screensaver | home */}
       <div className="home-pager-host -mx-4 landscape:hidden">
         <div
           ref={pagerRef}
           className="home-pager flex touch-pan-x overflow-x-auto overscroll-x-contain no-scrollbar"
         >
-          {(
-            [
-              {
-                key: 'world',
-                node: (
-                  <>
-                    <div className="mb-2 flex items-center gap-1 text-[11px] text-muted-foreground">
-                      <ChevronLeft className="size-3" />
-                      世界時計 · スワイプでホームへ
-                    </div>
-                    <WorldClockPanel />
-                  </>
-                ),
-              },
-              {
-                key: 'home',
-                node: (
-                  <div className="flex flex-col gap-5">
-                    {header}
-                    {progressCard}
-                    {goalsSection}
-                    {dailySection}
-                  </div>
-                ),
-              },
-              {
-                key: 'goals',
-                node: (
-                  <>
-                    <div className="mb-2 flex items-center justify-end gap-1 text-[11px] text-muted-foreground">
-                      目標ボード · スワイプでホームへ
-                      <ChevronRight className="size-3" />
-                    </div>
-                    <div className="flex flex-col gap-5">
-                      {goalsSection}
-                      {dailySection}
-                      {progressCard}
-                    </div>
-                  </>
-                ),
-              },
-            ] as const
-          ).map((p) => (
-            <section
-              key={p.key}
-              className="home-pager-page box-border shrink-0 snap-center snap-always px-4"
-              style={pageWidth > 0 ? { width: pageWidth, flex: `0 0 ${pageWidth}px` } : { width: '100%', flex: '0 0 100%' }}
-            >
-              {p.node}
-            </section>
-          ))}
+          <section
+            className="home-pager-page box-border shrink-0 snap-center snap-always"
+            style={pageWidth > 0 ? { width: pageWidth, flex: `0 0 ${pageWidth}px` } : { width: '100%', flex: '0 0 100%' }}
+          >
+            <WorldClockScreensaver />
+          </section>
+          <section
+            className="home-pager-page box-border shrink-0 snap-center snap-always px-4"
+            style={pageWidth > 0 ? { width: pageWidth, flex: `0 0 ${pageWidth}px` } : { width: '100%', flex: '0 0 100%' }}
+          >
+            {homeBody}
+          </section>
         </div>
-        {dots}
+
+        {page === 1 && (
+          <div className="pointer-events-auto flex items-center justify-center gap-2 py-2">
+            {PAGE_LABELS.map((label, i) => (
+              <button
+                key={label}
+                type="button"
+                aria-label={label}
+                aria-current={page === i}
+                onClick={() => scrollToPage(i)}
+                className={cn(
+                  'rounded-full transition-all',
+                  page === i ? 'h-1.5 w-5 bg-grass' : 'size-1.5 bg-muted-foreground/40',
+                )}
+              />
+            ))}
+          </div>
+        )}
+
+        {page === 0 && (
+          <button
+            type="button"
+            onClick={() => scrollToPage(1)}
+            className="fixed bottom-8 left-1/2 z-50 flex -translate-x-1/2 items-center gap-1 rounded-full px-3 py-1.5 text-[11px] text-muted-foreground/80"
+          >
+            <ChevronLeft className="size-3 rotate-180" />
+            ホーム
+          </button>
+        )}
       </div>
     </div>
   )

@@ -16,11 +16,13 @@ import { useStore } from "@/lib/store"
 import { useDataStatus } from "@/lib/data-status"
 import { useMusic } from "@/lib/music-store"
 import { CloudSyncHost } from "@/components/cloud-sync-host"
+import { cn } from "@/lib/utils"
 
 export function AppShell() {
   const tab = useUi((s) => s.tab)
   const back = useUi((s) => s.back)
   const stackLen = useUi((s) => s.stack.length)
+  const screensaver = useUi((s) => s.screensaver)
   const hydrated = useStore((s) => s.hydrated)
   const ensureData = useDataStatus((s) => s.ensure)
   const dataError = useDataStatus((s) => s.error)
@@ -28,7 +30,7 @@ export function AppShell() {
   // re-render overlays/screens when wiki JSON merges
   useDataStatus((s) => s.version)
 
-  // hardware back button / ESC closes the top overlay or music dock
+  // hardware back button / ESC closes the top overlay or music dock / exits screensaver
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return
@@ -36,7 +38,9 @@ export function AppShell() {
         back()
         return
       }
-      if (useMusic.getState().expanded) useMusic.getState().setExpanded(false)
+      if (useMusic.getState().expanded) {
+        useMusic.getState().setExpanded(false)
+      }
     }
     window.addEventListener("keydown", onKey)
     return () => window.removeEventListener("keydown", onKey)
@@ -55,10 +59,24 @@ export function AppShell() {
     }
   }, [])
 
+  useEffect(() => {
+    document.documentElement.dataset.screensaver = screensaver ? "1" : "0"
+    return () => {
+      delete document.documentElement.dataset.screensaver
+    }
+  }, [screensaver])
+
   return (
     <div className="relative mx-auto flex min-h-dvh w-full max-w-md flex-col landscape:max-w-5xl">
-      <AmbientBackground />
-      <main className="relative z-10 flex-1 px-4 pb-[calc(11.5rem+env(safe-area-inset-bottom,0px))] pt-[max(env(safe-area-inset-top),8px)]">
+      <AmbientBackground immersive={screensaver} />
+      <main
+        className={cn(
+          "relative z-10 flex-1 px-4 pt-[max(env(safe-area-inset-top),8px)] transition-[padding] duration-300",
+          screensaver
+            ? "pb-0"
+            : "pb-[calc(var(--chrome-stack)+env(safe-area-inset-bottom,0px))]",
+        )}
+      >
         {!hydrated ? (
           <LoadingState />
         ) : (
@@ -80,7 +98,7 @@ export function AppShell() {
         )}
       </main>
 
-      {dataError && hydrated && (
+      {dataError && hydrated && !screensaver && (
         <div className="pointer-events-none fixed inset-x-0 bottom-40 z-40 mx-auto flex w-full max-w-md justify-center px-4 landscape:max-w-5xl">
           <div className="pointer-events-auto flex max-w-full items-center gap-2 rounded-full border border-border bg-card/95 px-3 py-2 text-[11px] shadow-lg backdrop-blur">
             <span className="min-w-0 truncate text-muted-foreground">Wiki追記の読込に失敗</span>

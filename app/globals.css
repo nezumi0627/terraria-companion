@@ -133,6 +133,11 @@
   --sidebar-accent-foreground: #eef3ea;
   --sidebar-border: color-mix(in oklab, #eef3ea 12%, transparent);
   --sidebar-ring: #49a84a;
+
+  /* Bottom chrome: nav + collapsed music dock (main padding) */
+  --chrome-nav: 4.75rem;
+  --chrome-music: 5.5rem;
+  --chrome-stack: calc(var(--chrome-nav) + var(--chrome-music) + 0.5rem);
 }
 
 /* Optional lighter parchment theme */
@@ -231,9 +236,13 @@
   }
 
   .music-seek {
-    height: 4px;
+    height: 3px;
     border-radius: 999px;
     background: color-mix(in oklab, var(--muted) 80%, transparent);
+  }
+
+  .ambient-immersive .terraria-sky {
+    filter: saturate(1.08) brightness(1.05);
   }
 }
 

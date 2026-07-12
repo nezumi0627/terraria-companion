@@ -18,6 +18,7 @@ export function BottomNav() {
   const tab = useUi((s) => s.tab)
   const setTab = useUi((s) => s.setTab)
   const closeAll = useUi((s) => s.closeAll)
+  const screensaver = useUi((s) => s.screensaver)
 
   const go = (t: Tab) => {
     haptic(t === tab ? 'selection' : 'medium')
@@ -26,7 +27,13 @@ export function BottomNav() {
   }
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-md px-3 pb-[max(env(safe-area-inset-bottom),12px)] pt-2 landscape:max-w-5xl">
+    <nav
+      className={cn(
+        'fixed inset-x-0 bottom-0 z-40 mx-auto max-w-md px-3 pb-[max(env(safe-area-inset-bottom),12px)] pt-2 landscape:max-w-5xl',
+        'transition-all duration-300',
+        screensaver && 'pointer-events-none translate-y-[120%] opacity-0',
+      )}
+    >
       <div className="glass relative flex items-end justify-between rounded-2xl px-2 py-2 ring-1 ring-border shadow-[0_10px_30px_-8px_rgba(0,0,0,0.6)]">
         {TABS.map((t) => {
           const active = tab === t.key
