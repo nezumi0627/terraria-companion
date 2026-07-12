@@ -1,11 +1,13 @@
 {
   "id": "nezumi0627",
   "pinHash": "8f85d66000972c4a741f930c122227e60fee5c453d7e1b373e229834f76e8d76",
-  "updatedAt": 1783894610729,
+  "updatedAt": 1783894621411,
   "state": {
     "owned": {},
     "defeatedBosses": {},
-    "unlockedNpcs": {},
+    "unlockedNpcs": {
+      "guide": true
+    },
     "completedEvents": {},
     "visitedBiomes": {},
     "builtStations": {},
@@ -13,8 +15,15 @@
     "collected": {},
     "goals": [],
     "favorites": {},
-    "recentSearches": [],
+    "recentSearches": [
+      "ガイド"
+    ],
     "recentViews": [
+      {
+        "kind": "npc",
+        "id": "guide",
+        "at": 1783894617216
+      },
       {
         "kind": "item",
         "id": "zenith",
