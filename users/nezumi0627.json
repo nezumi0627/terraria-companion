@@ -1,7 +1,7 @@
 {
   "id": "nezumi0627",
   "pinHash": "8f85d66000972c4a741f930c122227e60fee5c453d7e1b373e229834f76e8d76",
-  "updatedAt": 1783881191643,
+  "updatedAt": 1783894496764,
   "state": {
     "owned": {},
     "defeatedBosses": {},
@@ -14,7 +14,68 @@
     "goals": [],
     "favorites": {},
     "recentSearches": [],
-    "recentViews": [],
+    "recentViews": [
+      {
+        "kind": "item",
+        "id": "bone-glove",
+        "at": 1783894194492
+      },
+      {
+        "kind": "item",
+        "id": "living-loom",
+        "at": 1783876482381
+      },
+      {
+        "kind": "item",
+        "id": "bar",
+        "at": 1783876474648
+      },
+      {
+        "kind": "item",
+        "id": "monks-belt",
+        "at": 1783876452628
+      },
+      {
+        "kind": "item",
+        "id": "whoopie-cushion",
+        "at": 1783876445594
+      },
+      {
+        "kind": "item",
+        "id": "grim-old-barb",
+        "at": 1783876433377
+      },
+      {
+        "kind": "item",
+        "id": "tsunami-in-a-bottle",
+        "at": 1783876413974
+      },
+      {
+        "kind": "item",
+        "id": "angel-wings",
+        "at": 1783876404487
+      },
+      {
+        "kind": "boss",
+        "id": "eye-of-cthulhu",
+        "at": 1783876399311
+      },
+      {
+        "kind": "item",
+        "id": "crimtane-ore",
+        "at": 1783876398041
+      },
+      {
+        "kind": "item",
+        "id": "demonite-ore",
+        "at": 1783876390383
+      },
+      {
+        "kind": "boss",
+        "id": "king-slime",
+        "at": 1783874947414
+      }
+    ],
     "dailyTasks": [],
     "dailyDate": "2026-07-12",
     "dailyChecked": {},
