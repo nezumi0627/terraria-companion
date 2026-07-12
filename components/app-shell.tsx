@@ -67,13 +67,13 @@ export function AppShell() {
   }, [screensaver])
 
   return (
-    <div className="relative mx-auto flex min-h-dvh w-full max-w-md flex-col landscape:max-w-5xl">
+    <div className="relative mx-auto flex min-h-dvh w-full max-w-md flex-col bg-transparent landscape:max-w-5xl">
       <AmbientBackground immersive={screensaver} />
       <main
         className={cn(
-          "relative z-10 flex-1 px-4 pt-[max(env(safe-area-inset-top),8px)] transition-[padding] duration-300",
+          "relative z-10 flex-1 bg-transparent px-4 pt-[max(env(safe-area-inset-top),8px)] transition-[padding] duration-300",
           screensaver
-            ? "pb-0"
+            ? "pb-[calc(7.5rem+env(safe-area-inset-bottom,0px))]"
             : "pb-[calc(var(--chrome-stack)+env(safe-area-inset-bottom,0px))]",
         )}
       >
@@ -87,6 +87,7 @@ export function AppShell() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.15 }}
+              className="bg-transparent"
             >
               {tab === "home" && <HomeScreen />}
               {tab === "acquire" && <AcquireScreen />}

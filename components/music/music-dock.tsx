@@ -102,7 +102,7 @@ export function MusicDock() {
   }, [hydrateLibrary])
 
   useEffect(() => {
-    if (screensaver) setExpanded(false)
+    if (!screensaver) setExpanded(false)
   }, [screensaver, setExpanded])
 
   useEffect(() => {
@@ -113,6 +113,8 @@ export function MusicDock() {
   const track = resolveTrack(currentId)
   const libCount = Object.keys(library).length
   const canPlay = MUSIC_TRACKS.some((t) => t.streamUrl) || libCount > 0
+  /** Player UI only on screensaver page — keeps bottom nav clear on home */
+  const showDock = screensaver
 
   const list = useMemo(() => {
     const catalog = MUSIC_TRACKS.filter((t) => {
@@ -167,13 +169,15 @@ export function MusicDock() {
         className={cn(
           'pointer-events-none fixed inset-x-0 bottom-0 z-[45] mx-auto w-full max-w-md px-3 landscape:max-w-5xl',
           'transition-all duration-300',
-          screensaver && 'translate-y-[120%] opacity-0',
+          showDock
+            ? 'translate-y-0 opacity-100'
+            : 'pointer-events-none translate-y-[110%] opacity-0',
         )}
       >
         <div
           className={cn(
-            'pointer-events-auto mb-[calc(var(--chrome-nav)+env(safe-area-inset-bottom,0px))]',
-            screensaver && 'pointer-events-none',
+            'mb-[max(env(safe-area-inset-bottom),12px)]',
+            showDock ? 'pointer-events-auto' : 'pointer-events-none',
           )}
         >
           <AnimatePresence initial={false}>
@@ -186,7 +190,7 @@ export function MusicDock() {
                 transition={{ type: 'spring', stiffness: 380, damping: 32 }}
                 className="mb-2 overflow-hidden"
               >
-                <div className="glass max-h-[min(48dvh,360px)] overflow-hidden rounded-2xl border border-border shadow-[0_12px_40px_-12px_rgba(0,0,0,0.75)]">
+                <div className="max-h-[min(48dvh,360px)] overflow-hidden rounded-2xl border border-white/15 bg-black/25 shadow-[0_12px_40px_-12px_rgba(0,0,0,0.55)] backdrop-blur-md">
                   <div className="flex items-center justify-between gap-2 border-b border-border/60 px-3 py-2">
                     <div className="min-w-0">
                       <div className="text-xs font-bold">ゲーム内 BGM</div>
@@ -392,7 +396,7 @@ export function MusicDock() {
           {/* Mini bar — sits above bottom nav without overlapping content */}
           <motion.div
             layout
-            className="glass overflow-hidden rounded-2xl border border-border shadow-[0_8px_28px_-10px_rgba(0,0,0,0.7)]"
+            className="overflow-hidden rounded-2xl border border-white/15 bg-black/30 shadow-[0_8px_28px_-10px_rgba(0,0,0,0.55)] backdrop-blur-md"
           >
             <button
               type="button"

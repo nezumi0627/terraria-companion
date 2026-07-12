@@ -426,10 +426,10 @@ export function HomeScreen() {
           <button
             type="button"
             onClick={() => scrollToPage(1)}
-            className="fixed bottom-8 left-1/2 z-50 flex -translate-x-1/2 items-center gap-1 rounded-full px-3 py-1.5 text-[11px] text-muted-foreground/80"
+            className="fixed left-1/2 top-[max(env(safe-area-inset-top),12px)] z-50 flex -translate-x-1/2 items-center gap-1 rounded-full px-3 py-1.5 text-[11px] text-white/70"
           >
-            <ChevronLeft className="size-3 rotate-180" />
             ホーム
+            <ChevronLeft className="size-3 rotate-180" />
           </button>
         )}
       </div>

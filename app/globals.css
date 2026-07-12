@@ -134,10 +134,10 @@
   --sidebar-border: color-mix(in oklab, #eef3ea 12%, transparent);
   --sidebar-ring: #49a84a;
 
-  /* Bottom chrome: nav + collapsed music dock (main padding) */
+  /* Bottom chrome: nav only on dashboard; music lives in screensaver */
   --chrome-nav: 4.75rem;
-  --chrome-music: 5.5rem;
-  --chrome-stack: calc(var(--chrome-nav) + var(--chrome-music) + 0.5rem);
+  --chrome-music: 0rem;
+  --chrome-stack: calc(var(--chrome-nav) + 0.75rem);
 }
 
 /* Optional lighter parchment theme */
@@ -171,7 +171,16 @@
   }
   html,
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background: transparent;
+  }
+  html {
+    background: #1a2830;
+  }
+  /* Screensaver: let ambient sky/grass show through (no solid page fill) */
+  html[data-screensaver='1'],
+  html[data-screensaver='1'] body {
+    background: transparent !important;
   }
   body {
     -webkit-tap-highlight-color: transparent;
@@ -229,10 +238,12 @@
   .home-pager-page {
     scroll-snap-align: center;
     scroll-snap-stop: always;
+    background: transparent;
   }
   .home-pager > section {
     content-visibility: auto;
     contain-intrinsic-size: 100% 640px;
+    background: transparent;
   }
 
   .music-seek {

@@ -37,33 +37,31 @@ export function WorldClockScreensaver({ className }: { className?: string }) {
     <div
       className={cn(
         'relative flex min-h-[100dvh] flex-col items-center justify-center px-2 text-center',
-        'pt-[max(env(safe-area-inset-top),0.5rem)] pb-16',
+        'bg-transparent pt-[max(env(safe-area-inset-top),0.5rem)] pb-[calc(8.5rem+env(safe-area-inset-bottom,0px))]',
         className,
       )}
     >
-      <p className="text-sm tracking-[0.2em] text-muted-foreground/90">{phaseLabel(h)}</p>
+      <p className="text-sm tracking-[0.2em] text-white/75 drop-shadow-sm">{phaseLabel(h)}</p>
 
-      <p className="mt-6 font-display text-[4.75rem] leading-none tracking-wide text-glow-gold tabular-nums sm:text-[5.5rem]">
+      <p className="mt-6 font-display text-[4.75rem] leading-none tracking-wide text-glow-gold tabular-nums drop-shadow-md sm:text-[5.5rem]">
         {pad(h)}
         <span className="text-gold/70">:</span>
         {pad(now.getMinutes())}
       </p>
 
-      <p className="mt-3 font-display text-2xl tabular-nums text-foreground/70">
+      <p className="mt-3 font-display text-2xl tabular-nums text-white/65 drop-shadow-sm">
         {pad(now.getSeconds())}
       </p>
 
-      <p className="mt-8 text-sm text-muted-foreground/85">{date}</p>
+      <p className="mt-8 text-sm text-white/70 drop-shadow-sm">{date}</p>
 
       {userId ? (
-        <p className="mt-3 text-xs text-grass/90">{userId}</p>
+        <p className="mt-3 text-xs text-grass drop-shadow-sm">{userId}</p>
       ) : (
-        <p className="mt-3 text-xs text-muted-foreground/70">テラリア コンパニオン</p>
+        <p className="mt-3 text-xs text-white/55 drop-shadow-sm">テラリア コンパニオン</p>
       )}
 
-      <p className="mt-16 text-[11px] tracking-wide text-muted-foreground/55">
-        右へスワイプでホームへ
-      </p>
+      <p className="mt-12 text-[11px] tracking-wide text-white/45">右へスワイプでホーム · 下で BGM</p>
     </div>
   )
 }

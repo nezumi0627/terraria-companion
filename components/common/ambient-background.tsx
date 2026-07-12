@@ -105,7 +105,7 @@ export function AmbientBackground({ immersive = false }: { immersive?: boolean }
     <div
       aria-hidden
       className={cn(
-        'pointer-events-none fixed inset-0 -z-10 overflow-hidden contain-strict transition-opacity duration-500',
+        'pointer-events-none fixed inset-0 z-0 overflow-hidden contain-strict transition-opacity duration-500',
         immersive && 'ambient-immersive',
       )}
     >
