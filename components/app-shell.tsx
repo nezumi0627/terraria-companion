@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion"
 import { AmbientBackground } from "@/components/common/ambient-background"
 import { BottomNav } from "@/components/common/bottom-nav"
 import { OverlayHost } from "@/components/detail/overlay-host"
+import { MusicDock } from "@/components/music/music-dock"
 import { HomeScreen } from "@/components/screens/home-screen"
 import { AcquireScreen } from "@/components/screens/acquire-screen"
 import { WikiScreen } from "@/components/screens/wiki-screen"
@@ -13,6 +14,7 @@ import { SettingsScreen } from "@/components/screens/settings-screen"
 import { useUi } from "@/lib/ui-store"
 import { useStore } from "@/lib/store"
 import { useDataStatus } from "@/lib/data-status"
+import { useMusic } from "@/lib/music-store"
 import { CloudSyncHost } from "@/components/cloud-sync-host"
 
 export function AppShell() {
@@ -26,10 +28,15 @@ export function AppShell() {
   // re-render overlays/screens when wiki JSON merges
   useDataStatus((s) => s.version)
 
-  // hardware back button / ESC closes the top overlay
+  // hardware back button / ESC closes the top overlay or music dock
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && stackLen > 0) back()
+      if (e.key !== "Escape") return
+      if (stackLen > 0) {
+        back()
+        return
+      }
+      if (useMusic.getState().expanded) useMusic.getState().setExpanded(false)
     }
     window.addEventListener("keydown", onKey)
     return () => window.removeEventListener("keydown", onKey)
@@ -49,19 +56,19 @@ export function AppShell() {
   }, [])
 
   return (
-    <div className="relative mx-auto flex min-h-dvh w-full max-w-md flex-col">
+    <div className="relative mx-auto flex min-h-dvh w-full max-w-md flex-col landscape:max-w-5xl">
       <AmbientBackground />
-      <main className="relative z-10 flex-1 px-4 pb-32 pt-[max(env(safe-area-inset-top),8px)]">
+      <main className="relative z-10 flex-1 px-4 pb-[calc(11.5rem+env(safe-area-inset-bottom,0px))] pt-[max(env(safe-area-inset-top),8px)]">
         {!hydrated ? (
           <LoadingState />
         ) : (
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={tab}
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.15 }}
             >
               {tab === "home" && <HomeScreen />}
               {tab === "acquire" && <AcquireScreen />}
@@ -74,7 +81,7 @@ export function AppShell() {
       </main>
 
       {dataError && hydrated && (
-        <div className="pointer-events-none fixed inset-x-0 bottom-24 z-40 mx-auto flex w-full max-w-md justify-center px-4">
+        <div className="pointer-events-none fixed inset-x-0 bottom-40 z-40 mx-auto flex w-full max-w-md justify-center px-4 landscape:max-w-5xl">
           <div className="pointer-events-auto flex max-w-full items-center gap-2 rounded-full border border-border bg-card/95 px-3 py-2 text-[11px] shadow-lg backdrop-blur">
             <span className="min-w-0 truncate text-muted-foreground">Wiki追記の読込に失敗</span>
             <button
@@ -90,6 +97,7 @@ export function AppShell() {
       )}
 
       <OverlayHost />
+      <MusicDock />
       <BottomNav />
       <CloudSyncHost />
     </div>

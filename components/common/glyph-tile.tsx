@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { memo, useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
 
 export function tokenColor(name: string): string {
@@ -10,7 +10,6 @@ export function tokenColor(name: string): string {
 interface GlyphTileProps {
   glyph: string
   color: string
-  /** local sprite src (e.g. /sprites/zenith.png); falls back to glyph on error */
   image?: string
   size?: number
   className?: string
@@ -18,11 +17,15 @@ interface GlyphTileProps {
   glow?: boolean
 }
 
-/**
- * Pixel-art tile. Uses a real sprite when available; on load failure falls back
- * to the text glyph immediately (no cache-bust retries — those doubled 404s).
- */
-export function GlyphTile({ glyph, color, image, size = 44, className, dim, glow }: GlyphTileProps) {
+export const GlyphTile = memo(function GlyphTile({
+  glyph,
+  color,
+  image,
+  size = 44,
+  className,
+  dim,
+  glow,
+}: GlyphTileProps) {
   const c = tokenColor(color)
   const [broken, setBroken] = useState(false)
 
@@ -69,6 +72,7 @@ export function GlyphTile({ glyph, color, image, size = 44, className, dim, glow
           draggable={false}
           loading="lazy"
           decoding="async"
+          referrerPolicy="no-referrer"
           onError={() => setBroken(true)}
           className="relative object-contain"
           style={{
@@ -85,4 +89,4 @@ export function GlyphTile({ glyph, color, image, size = 44, className, dim, glow
       )}
     </span>
   )
-}
+})

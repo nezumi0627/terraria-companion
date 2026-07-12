@@ -1,26 +1,20 @@
-<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <style>
-    @media (prefers-color-scheme: light) {
-      .background { fill: black; }
-      .foreground { fill: white; }
-    }
-    @media (prefers-color-scheme: dark) {
-      .background { fill: white; }
-      .foreground { fill: black; }
-    }
-  </style>
-  <g clip-path="url(#clip0_7960_43945)">
-    <rect class="background" width="180" height="180" rx="37" />
-    <g style="transform: scale(95%); transform-origin: center">
-      <path class="foreground"
-        d="M101.141 53H136.632C151.023 53 162.689 64.6662 162.689 79.0573V112.904H148.112V79.0573C148.112 78.7105 148.098 78.3662 148.072 78.0251L112.581 112.898C112.701 112.902 112.821 112.904 112.941 112.904H148.112V126.672H112.941C98.5504 126.672 86.5638 114.891 86.5638 100.5V66.7434H101.141V100.5C101.141 101.15 101.191 101.792 101.289 102.422L137.56 66.7816C137.255 66.7563 136.945 66.7434 136.632 66.7434H101.141V53Z" />
-      <path class="foreground"
-        d="M65.2926 124.136L14 66.7372H34.6355L64.7495 100.436V66.7372H80.1365V118.47C80.1365 126.278 70.4953 129.958 65.2926 124.136Z" />
-    </g>
-  </g>
-  <defs>
-    <clipPath id="clip0_7960_43945">
-      <rect width="180" height="180" fill="white" />
-    </clipPath>
-  </defs>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" fill="none">
+  <rect width="512" height="512" rx="96" fill="#1B1F1A"/>
+  <rect x="24" y="24" width="464" height="464" rx="80" fill="#23281F"/>
+  <!-- pickaxe -->
+  <path stroke="#3A3F38" stroke-width="28" stroke-linecap="round" d="M140 140 L372 372"/>
+  <path fill="#8B7355" d="M120 360 L170 410 L200 380 L150 330 Z"/>
+  <path fill="#9AA3A0" d="M110 120 L200 150 L180 200 L100 170 Z"/>
+  <!-- sword -->
+  <path stroke="#3A3F38" stroke-width="22" stroke-linecap="round" d="M372 140 L140 372"/>
+  <path fill="#C9CED0" d="M350 100 L400 150 L280 270 L230 220 Z"/>
+  <path fill="#E8B84A" d="M210 300 L250 340 L230 360 L190 320 Z"/>
+  <path fill="#8B7355" d="M180 350 L220 390 L200 410 L160 370 Z"/>
+  <!-- emerald -->
+  <path fill="#1F6B3A" d="M256 120 L340 200 L256 392 L172 200 Z"/>
+  <path fill="#3DDC7C" d="M256 140 L312 200 L256 340 L200 200 Z"/>
+  <path fill="#9BF0B8" d="M256 155 L285 195 L256 220 L227 195 Z"/>
+  <circle cx="220" cy="180" r="8" fill="#E8FFE8" opacity="0.9"/>
+  <circle cx="300" cy="240" r="5" fill="#9BF0B8" opacity="0.8"/>
+  <circle cx="240" cy="280" r="4" fill="#9BF0B8" opacity="0.7"/>
 </svg>

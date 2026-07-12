@@ -3,6 +3,7 @@
 import { Home, Book, Target, Map, Settings } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useUi, type Tab } from '@/lib/ui-store'
+import { haptic } from '@/lib/haptics'
 import { cn } from '@/lib/utils'
 
 const TABS: { key: Tab; label: string; icon: typeof Home }[] = [
@@ -19,12 +20,13 @@ export function BottomNav() {
   const closeAll = useUi((s) => s.closeAll)
 
   const go = (t: Tab) => {
+    haptic(t === tab ? 'selection' : 'medium')
     closeAll()
     setTab(t)
   }
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-md px-3 pb-[max(env(safe-area-inset-bottom),12px)] pt-2">
+    <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-md px-3 pb-[max(env(safe-area-inset-bottom),12px)] pt-2 landscape:max-w-5xl">
       <div className="glass relative flex items-end justify-between rounded-2xl px-2 py-2 ring-1 ring-border shadow-[0_10px_30px_-8px_rgba(0,0,0,0.6)]">
         {TABS.map((t) => {
           const active = tab === t.key
@@ -62,7 +64,7 @@ export function BottomNav() {
             <button
               key={t.key}
               onClick={() => go(t.key)}
-              className="relative flex w-[20%] flex-col items-center gap-1 py-1.5"
+              className="relative flex w-[20%] flex-col items-center gap-1 py-1.5 transition-transform active:scale-95"
               aria-label={t.label}
               aria-current={active ? 'page' : undefined}
             >
@@ -70,7 +72,12 @@ export function BottomNav() {
                 className={cn('size-5 transition-colors', active ? 'text-grass' : 'text-muted-foreground')}
                 strokeWidth={active ? 2.6 : 2}
               />
-              <span className={cn('text-[10px] transition-colors', active ? 'font-bold text-grass' : 'text-muted-foreground')}>
+              <span
+                className={cn(
+                  'text-[10px] transition-colors',
+                  active ? 'font-bold text-grass' : 'text-muted-foreground',
+                )}
+              >
                 {t.label}
               </span>
               {active && (

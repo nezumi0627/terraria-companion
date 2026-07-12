@@ -6,6 +6,7 @@ import { Cloud, CloudOff, Loader2, LogIn, LogOut, UserPlus, Sparkles, RefreshCw 
 import { useAuth } from '@/lib/auth-store'
 import { cloudApiConfigured, cloudApiReady } from '@/lib/cloud-api'
 import { GITHUB_REPO } from '@/lib/github-users'
+import { haptic } from '@/lib/haptics'
 import { cn } from '@/lib/utils'
 
 export function AuthPanel({ onFlash }: { onFlash: (msg: string) => void }) {
@@ -45,9 +46,11 @@ export function AuthPanel({ onFlash }: { onFlash: (msg: string) => void }) {
     try {
       const result = mode === 'login' ? await login(id, pin) : await register(id, pin)
       if (!result.ok) {
+        haptic('warning')
         onFlash(result.error || '失敗しました')
         return
       }
+      haptic('success')
       onFlash(mode === 'login' ? 'ログインしました — クラウド同期オン' : '冒険の記録をクラウドに保存しました')
       setPin('')
     } finally {
@@ -56,40 +59,69 @@ export function AuthPanel({ onFlash }: { onFlash: (msg: string) => void }) {
   }
 
   if (userId) {
+    const syncedLabel = syncing
+      ? '同期中…'
+      : lastSyncedAt
+        ? `最終同期 ${new Date(lastSyncedAt).toLocaleString('ja-JP', {
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+          })}`
+        : 'まだ同期していません'
+    const initial = userId.slice(0, 1).toUpperCase()
+
     return (
       <motion.div
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-2xl border border-grass/25 bg-gradient-to-br from-card via-card to-grass/10 p-4"
+        className="relative overflow-hidden rounded-2xl border border-grass/30 bg-gradient-to-br from-grass/15 via-card to-card p-4"
       >
-        <div className="pointer-events-none absolute -right-6 -top-6 size-24 rounded-full bg-grass/15 blur-2xl" />
-        <div className="relative mb-3 flex items-center gap-2">
-          <span className="grid size-8 place-items-center rounded-xl bg-grass/20 text-grass">
-            <Cloud className="size-4" />
-          </span>
-          <div>
-            <div className="text-sm font-bold">クラウドアカウント</div>
-            <div className="text-[11px] text-muted-foreground">端末を変えても進行を引き継げます</div>
+        <div className="pointer-events-none absolute -right-10 -top-12 size-40 rounded-full bg-grass/20 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-8 -left-6 size-28 rounded-full bg-gold/10 blur-2xl" />
+
+        <div className="relative flex items-center gap-3">
+          <div className="relative shrink-0">
+            <div className="grid size-14 place-items-center rounded-2xl border border-grass/40 bg-gradient-to-br from-grass/40 to-grass/10 font-display text-2xl text-grass shadow-[0_0_24px_-6px] shadow-grass/40">
+              {initial}
+            </div>
+            <span
+              className={cn(
+                'absolute -bottom-1 -right-1 flex items-center gap-0.5 rounded-full border border-background px-1.5 py-0.5 text-[9px] font-bold',
+                syncing ? 'bg-gold text-accent-foreground' : 'bg-grass text-primary-foreground',
+              )}
+            >
+              <Cloud className="size-2.5" />
+              {syncing ? 'SYNC' : 'ON'}
+            </span>
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              冒険者プロフィール
+            </div>
+            <div className="truncate font-display text-xl text-grass">{userId}</div>
+            <div className="mt-0.5 text-[11px] text-muted-foreground">{syncedLabel}</div>
           </div>
         </div>
-        <div className="relative mb-3 flex items-center justify-between gap-2 rounded-xl bg-background/50 px-3 py-2">
-          <span className="font-display text-lg text-grass">{userId}</span>
-          <span className="text-[11px] text-muted-foreground">
-            {syncing
-              ? '同期中…'
-              : lastSyncedAt
-                ? `最終同期 ${new Date(lastSyncedAt).toLocaleString('ja-JP', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}`
-                : '未同期'}
-          </span>
+
+        <div className="relative mt-3 rounded-xl border border-border/60 bg-background/40 px-3 py-2 text-[11px] leading-relaxed text-muted-foreground">
+          進行はクラウドに自動保存されます。別の端末でも同じ ID と数字4桁で続けられます。
         </div>
-        {lastError && <p className="mb-2 text-[11px] text-danger">{lastError}</p>}
-        <div className="relative flex gap-2">
+
+        {lastError && (
+          <p className="relative mt-2 rounded-lg bg-danger/10 px-2 py-1.5 text-[11px] text-danger">{lastError}</p>
+        )}
+
+        <div className="relative mt-3 flex gap-2">
           <button
             type="button"
             disabled={syncing || status === 'loading'}
             onClick={async () => {
+              haptic('medium')
               const r = await saveNow()
               onFlash(r.ok ? 'クラウドへ保存しました' : r.error || '保存に失敗')
+              if (r.ok) haptic('success')
+              else haptic('warning')
             }}
             className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-grass py-2.5 text-xs font-bold text-primary-foreground shadow-[0_0_20px_-6px] shadow-grass/50 transition hover:brightness-110 disabled:opacity-60"
           >
@@ -99,10 +131,11 @@ export function AuthPanel({ onFlash }: { onFlash: (msg: string) => void }) {
           <button
             type="button"
             onClick={() => {
+              haptic('light')
               logout()
               onFlash('ログアウトしました（この端末のローカルデータは残ります）')
             }}
-            className="inline-flex items-center gap-1 rounded-xl bg-secondary px-3 py-2.5 text-xs font-semibold text-secondary-foreground transition hover:bg-secondary/80"
+            className="inline-flex items-center gap-1 rounded-xl border border-border bg-secondary/80 px-3 py-2.5 text-xs font-semibold text-secondary-foreground transition hover:bg-secondary"
           >
             <LogOut className="size-3.5" />
             ログアウト

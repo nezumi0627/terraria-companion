@@ -271,6 +271,45 @@ export function SettingsScreen() {
         <AuthPanel onFlash={flash} />
       </Group>
 
+      <Group title="サウンドトラック">
+        <div className="rounded-xl border border-border bg-card/60 p-3 text-[11px] leading-relaxed text-muted-foreground">
+          <p className="font-semibold text-foreground">Terraria in-game Music</p>
+          <p className="mt-1">© Re-Logic. All rights reserved.</p>
+          <p className="mt-1">
+            作曲: Scott Lloyd Shelly (Resonance Array)。Deerclops は Klei、Torch God は Prosthetic Orchestra。
+          </p>
+          <p className="mt-1">
+            曲目は公式 Wiki「Music」準拠。試聴は Wiki の Listen 列と同じ配信をストリーム再生します（音源の同梱・再配布はありません）。購入 OST で上書きもできます。
+          </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <a
+              href="https://store.steampowered.com/app/409210/Terraria_Official_Soundtrack/"
+              target="_blank"
+              rel="noreferrer"
+              className="font-semibold text-grass underline-offset-2 hover:underline"
+            >
+              Steam で購入
+            </a>
+            <a
+              href="https://re-logic.bandcamp.com/album/terraria-soundtrack"
+              target="_blank"
+              rel="noreferrer"
+              className="font-semibold text-grass underline-offset-2 hover:underline"
+            >
+              Bandcamp
+            </a>
+            <a
+              href="https://terraria.wiki.gg/wiki/Music"
+              target="_blank"
+              rel="noreferrer"
+              className="font-semibold text-grass underline-offset-2 hover:underline"
+            >
+              曲目一覧（Wiki Music）
+            </a>
+          </div>
+        </div>
+      </Group>
+
       <Group title="フィードバック">
         <FeedbackForm onFlash={flash} />
       </Group>

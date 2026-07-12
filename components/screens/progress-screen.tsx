@@ -9,6 +9,7 @@ import { ProgressRing } from "@/components/common/progress-ring"
 import { useStore } from "@/lib/store"
 import { useUi } from "@/lib/ui-store"
 import { useDataStatus } from "@/lib/data-status"
+import { haptic } from "@/lib/haptics"
 import { cn } from "@/lib/utils"
 
 /** Canonical progression bosses only (exclude wiki-supplemental noise). */
@@ -178,10 +179,13 @@ function BossSection({
                     </span>
                   </button>
                   <button
-                    onClick={() => toggleBoss(b.id)}
+                    onClick={() => {
+                      haptic(done ? "light" : "success")
+                      toggleBoss(b.id)
+                    }}
                     aria-label={done ? "討伐を取り消す" : "討伐済みにする"}
                     className={cn(
-                      "grid size-7 shrink-0 place-items-center rounded-md border-2",
+                      "grid size-7 shrink-0 place-items-center rounded-md border-2 transition-transform active:scale-90",
                       done ? "border-grass bg-grass text-primary-foreground" : "border-border",
                     )}
                   >

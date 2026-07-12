@@ -24,6 +24,7 @@
     "data:merge-wiki": "node scripts/merge-wiki-into-app.mjs",
     "data:sync": "node scripts/fetch-wiki-data.mjs && node scripts/fix-wiki-names.mjs && node scripts/clean-wiki-descriptions.mjs && node scripts/generate-catalog.mjs && node scripts/merge-wiki-into-app.mjs && node scripts/download-sprites.mjs --retry-failed",
     "data:refresh-text": "node scripts/rebuild-entity-text.mjs --bad-only && node scripts/merge-wiki-into-app.mjs && node scripts/clean-public-descriptions.mjs",
+    "music:wiki-streams": "node scripts/extract-wiki-music-urls.mjs",
     "cloud:dev": "node scripts/cloud-api-server.mjs",
     "cloud:deploy": "npx wrangler deploy --config workers/cloud-api/wrangler.toml"
   },

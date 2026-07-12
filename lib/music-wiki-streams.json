@@ -1,0 +1,626 @@
+[
+  {
+    "mwTitle": "Music-Overworld_Day.mp3",
+    "path": "/images/Music-Overworld_Day.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Overworld_Day.mp3",
+    "durationHint": 138
+  },
+  {
+    "mwTitle": "Music-Eerie.mp3",
+    "path": "/images/Music-Eerie.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Eerie.mp3",
+    "durationHint": 162
+  },
+  {
+    "mwTitle": "Music-Overworld_Night.mp3",
+    "path": "/images/Music-Overworld_Night.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Overworld_Night.mp3",
+    "durationHint": 122
+  },
+  {
+    "mwTitle": "Music-Underground.mp3",
+    "path": "/images/Music-Underground.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Underground.mp3",
+    "durationHint": 180
+  },
+  {
+    "mwTitle": "Music-Boss_1.mp3",
+    "path": "/images/Music-Boss_1.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Boss_1.mp3",
+    "durationHint": 137
+  },
+  {
+    "mwTitle": "Music-Title_Screen.mp3",
+    "path": "/images/Music-Title_Screen.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Title_Screen.mp3",
+    "durationHint": 80
+  },
+  {
+    "mwTitle": "Music-Jungle.mp3",
+    "path": "/images/Music-Jungle.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Jungle.mp3",
+    "durationHint": 165
+  },
+  {
+    "mwTitle": "Music-Corruption.mp3",
+    "path": "/images/Music-Corruption.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Corruption.mp3",
+    "durationHint": 158
+  },
+  {
+    "mwTitle": "Music-The_Hallow.mp3",
+    "path": "/images/Music-The_Hallow.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-The_Hallow.mp3",
+    "durationHint": 127
+  },
+  {
+    "mwTitle": "Music-Underground_Corruption.mp3",
+    "path": "/images/Music-Underground_Corruption.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Underground_Corruption.mp3",
+    "durationHint": 143
+  },
+  {
+    "mwTitle": "Music-Underground_Hallow.mp3",
+    "path": "/images/Music-Underground_Hallow.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Underground_Hallow.mp3",
+    "durationHint": 177
+  },
+  {
+    "mwTitle": "Music-Boss_2.mp3",
+    "path": "/images/Music-Boss_2.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Boss_2.mp3",
+    "durationHint": 121
+  },
+  {
+    "mwTitle": "Music-Boss_3.mp3",
+    "path": "/images/Music-Boss_3.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Boss_3.mp3",
+    "durationHint": 111
+  },
+  {
+    "mwTitle": "Music-Snow.mp3",
+    "path": "/images/Music-Snow.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Snow.mp3",
+    "durationHint": 95
+  },
+  {
+    "mwTitle": "Music-Space_Night.mp3",
+    "path": "/images/Music-Space_Night.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Space_Night.mp3",
+    "durationHint": 97
+  },
+  {
+    "mwTitle": "Music-Crimson.mp3",
+    "path": "/images/Music-Crimson.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Crimson.mp3",
+    "durationHint": 128
+  },
+  {
+    "mwTitle": "Music-Golem.mp3",
+    "path": "/images/Music-Golem.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Golem.mp3",
+    "durationHint": 89
+  },
+  {
+    "mwTitle": "Music-Alternate_Day.mp3",
+    "path": "/images/Music-Alternate_Day.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Alternate_Day.mp3",
+    "durationHint": 104
+  },
+  {
+    "mwTitle": "Music-Rain.mp3",
+    "path": "/images/Music-Rain.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Rain.mp3",
+    "durationHint": 99
+  },
+  {
+    "mwTitle": "Music-Ice_biome.mp3",
+    "path": "/images/Music-Ice_biome.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Ice_biome.mp3",
+    "durationHint": 85
+  },
+  {
+    "mwTitle": "Music-Desert.mp3",
+    "path": "/images/Music-Desert.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Desert.mp3",
+    "durationHint": 90
+  },
+  {
+    "mwTitle": "Music-Ocean_Day.mp3",
+    "path": "/images/Music-Ocean_Day.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Ocean_Day.mp3",
+    "durationHint": 89
+  },
+  {
+    "mwTitle": "Music-Dungeon.mp3",
+    "path": "/images/Music-Dungeon.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Dungeon.mp3",
+    "durationHint": 101
+  },
+  {
+    "mwTitle": "Music-Plantera.mp3",
+    "path": "/images/Music-Plantera.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Plantera.mp3",
+    "durationHint": 77
+  },
+  {
+    "mwTitle": "Music-Boss_5.mp3",
+    "path": "/images/Music-Boss_5.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Boss_5.mp3",
+    "durationHint": 88
+  },
+  {
+    "mwTitle": "Music-Lihzahrd.mp3",
+    "path": "/images/Music-Lihzahrd.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Lihzahrd.mp3",
+    "durationHint": 98
+  },
+  {
+    "mwTitle": "Music-Eclipse.mp3",
+    "path": "/images/Music-Eclipse.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Eclipse.mp3",
+    "durationHint": 97
+  },
+  {
+    "mwTitle": "28_RainAmbience.wav",
+    "path": "/images/28_RainAmbience.wav",
+    "url": "https://terraria.wiki.gg/images/28_RainAmbience.wav",
+    "durationHint": 52
+  },
+  {
+    "mwTitle": "Music-Mushrooms.mp3",
+    "path": "/images/Music-Mushrooms.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Mushrooms.mp3",
+    "durationHint": 77
+  },
+  {
+    "mwTitle": "Music-Pumpkin_Moon.mp3",
+    "path": "/images/Music-Pumpkin_Moon.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Pumpkin_Moon.mp3",
+    "durationHint": 87
+  },
+  {
+    "mwTitle": "Music-Alternate_Underground.mp3",
+    "path": "/images/Music-Alternate_Underground.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Alternate_Underground.mp3",
+    "durationHint": 73
+  },
+  {
+    "mwTitle": "Music-Frost_Moon.mp3",
+    "path": "/images/Music-Frost_Moon.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Frost_Moon.mp3",
+    "durationHint": 69
+  },
+  {
+    "mwTitle": "Music-Underground_Crimson.mp3",
+    "path": "/images/Music-Underground_Crimson.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Underground_Crimson.mp3",
+    "durationHint": 162
+  },
+  {
+    "mwTitle": "Music-Lunar_Boss.mp3",
+    "path": "/images/Music-Lunar_Boss.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Lunar_Boss.mp3",
+    "durationHint": 88
+  },
+  {
+    "mwTitle": "Music-Pirate_Invasion.mp3",
+    "path": "/images/Music-Pirate_Invasion.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Pirate_Invasion.mp3",
+    "durationHint": 111
+  },
+  {
+    "mwTitle": "Music-Underworld.mp3",
+    "path": "/images/Music-Underworld.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Underworld.mp3",
+    "durationHint": 131
+  },
+  {
+    "mwTitle": "Music-Martian_Madness.mp3",
+    "path": "/images/Music-Martian_Madness.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Martian_Madness.mp3",
+    "durationHint": 102
+  },
+  {
+    "mwTitle": "Music-Moon_Lord.mp3",
+    "path": "/images/Music-Moon_Lord.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Moon_Lord.mp3",
+    "durationHint": 114
+  },
+  {
+    "mwTitle": "Music-Goblin_Army.mp3",
+    "path": "/images/Music-Goblin_Army.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Goblin_Army.mp3",
+    "durationHint": 106
+  },
+  {
+    "mwTitle": "Music-Sandstorm.mp3",
+    "path": "/images/Music-Sandstorm.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Sandstorm.mp3",
+    "durationHint": 99
+  },
+  {
+    "mwTitle": "Music-Old_One&#39;s_Army.mp3",
+    "path": "/images/Music-Old_One%27s_Army.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Old_One%27s_Army.mp3",
+    "durationHint": 142
+  },
+  {
+    "mwTitle": "Music-Space_Day.mp3",
+    "path": "/images/Music-Space_Day.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Space_Day.mp3",
+    "durationHint": 84
+  },
+  {
+    "mwTitle": "Music-Ocean_Night.mp3",
+    "path": "/images/Music-Ocean_Night.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Ocean_Night.mp3",
+    "durationHint": 93
+  },
+  {
+    "mwTitle": "Music-Windy_Day.mp3",
+    "path": "/images/Music-Windy_Day.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Windy_Day.mp3",
+    "durationHint": 81
+  },
+  {
+    "mwTitle": "45_-_Wind_Ambiance.mp3",
+    "path": "/images/45_-_Wind_Ambiance.mp3",
+    "url": "https://terraria.wiki.gg/images/45_-_Wind_Ambiance.mp3",
+    "durationHint": 81
+  },
+  {
+    "mwTitle": "Music-Town_Day.mp3",
+    "path": "/images/Music-Town_Day.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Town_Day.mp3",
+    "durationHint": 127
+  },
+  {
+    "mwTitle": "Music-Town_Night.mp3",
+    "path": "/images/Music-Town_Night.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Town_Night.mp3",
+    "durationHint": 118
+  },
+  {
+    "mwTitle": "Music-Slime_Rain.mp3",
+    "path": "/images/Music-Slime_Rain.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Slime_Rain.mp3",
+    "durationHint": 83
+  },
+  {
+    "mwTitle": "Music-Contest_Winner.mp3",
+    "path": "/images/Music-Contest_Winner.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Contest_Winner.mp3",
+    "durationHint": 213
+  },
+  {
+    "mwTitle": "Music-Journey&#39;s_Beginning_(intro).mp3",
+    "path": "/images/Music-Journey%27s_Beginning_%28intro%29.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Journey%27s_Beginning_%28intro%29.mp3",
+    "durationHint": 85
+  },
+  {
+    "mwTitle": "Music-Journey&#39;s_Beginning.mp3",
+    "path": "/images/Music-Journey%27s_Beginning.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Journey%27s_Beginning.mp3",
+    "durationHint": 75
+  },
+  {
+    "mwTitle": "Music-Storm.mp3",
+    "path": "/images/Music-Storm.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Storm.mp3",
+    "durationHint": 97
+  },
+  {
+    "mwTitle": "Music-Graveyard.mp3",
+    "path": "/images/Music-Graveyard.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Graveyard.mp3",
+    "durationHint": 118
+  },
+  {
+    "mwTitle": "Music-Underground_Jungle.mp3",
+    "path": "/images/Music-Underground_Jungle.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Underground_Jungle.mp3",
+    "durationHint": 109
+  },
+  {
+    "mwTitle": "Music-Surface_Night_Jungle.mp3",
+    "path": "/images/Music-Surface_Night_Jungle.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Surface_Night_Jungle.mp3",
+    "durationHint": 97
+  },
+  {
+    "mwTitle": "Music-Queen_Slime.mp3",
+    "path": "/images/Music-Queen_Slime.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Queen_Slime.mp3",
+    "durationHint": 91
+  },
+  {
+    "mwTitle": "Music-Empress_of_Light.mp3",
+    "path": "/images/Music-Empress_of_Light.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Empress_of_Light.mp3",
+    "durationHint": 169
+  },
+  {
+    "mwTitle": "Music-Duke_Fishron.mp3",
+    "path": "/images/Music-Duke_Fishron.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Duke_Fishron.mp3",
+    "durationHint": 103
+  },
+  {
+    "mwTitle": "Music-Morning_Rain.mp3",
+    "path": "/images/Music-Morning_Rain.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Morning_Rain.mp3",
+    "durationHint": 61
+  },
+  {
+    "mwTitle": "Music-Title_(Console).mp3",
+    "path": "/images/Music-Title_%28Console%29.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Title_%28Console%29.mp3",
+    "durationHint": 97
+  },
+  {
+    "mwTitle": "Music-Underground_Desert.mp3",
+    "path": "/images/Music-Underground_Desert.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Underground_Desert.mp3",
+    "durationHint": 122
+  },
+  {
+    "mwTitle": "Music-Rain_(Otherworldly).mp3",
+    "path": "/images/Music-Rain_%28Otherworldly%29.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Rain_%28Otherworldly%29.mp3",
+    "durationHint": 95
+  },
+  {
+    "mwTitle": "Music-Forest_Day_(Otherworldly).mp3",
+    "path": "/images/Music-Forest_Day_%28Otherworldly%29.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Forest_Day_%28Otherworldly%29.mp3",
+    "durationHint": 93
+  },
+  {
+    "mwTitle": "Music-Forest_Night_(Otherworldly).mp3",
+    "path": "/images/Music-Forest_Night_%28Otherworldly%29.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Forest_Night_%28Otherworldly%29.mp3",
+    "durationHint": 91
+  },
+  {
+    "mwTitle": "Music-Main_Theme_(Underground)_(Otherworldly).mp3",
+    "path": "/images/Music-Main_Theme_%28Underground%29_%28Otherworldly%29.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Main_Theme_%28Underground%29_%28Otherworldly%29.mp3",
+    "durationHint": 88
+  },
+  {
+    "mwTitle": "Music-Desert_(Otherworldly).mp3",
+    "path": "/images/Music-Desert_%28Otherworldly%29.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Desert_%28Otherworldly%29.mp3",
+    "durationHint": 96
+  },
+  {
+    "mwTitle": "Music-Ocean_(Otherworldly).mp3",
+    "path": "/images/Music-Ocean_%28Otherworldly%29.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Ocean_%28Otherworldly%29.mp3",
+    "durationHint": 102
+  },
+  {
+    "mwTitle": "Music-Crystal_Caves_(Mushrooms)_(Otherworldly).mp3",
+    "path": "/images/Music-Crystal_Caves_%28Mushrooms%29_%28Otherworldly%29.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Crystal_Caves_%28Mushrooms%29_%28Otherworldly%29.mp3",
+    "durationHint": 97
+  },
+  {
+    "mwTitle": "Music-Dungeon_(Otherworldly).mp3",
+    "path": "/images/Music-Dungeon_%28Otherworldly%29.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Dungeon_%28Otherworldly%29.mp3",
+    "durationHint": 91
+  },
+  {
+    "mwTitle": "Music-Space_(Otherworldly).mp3",
+    "path": "/images/Music-Space_%28Otherworldly%29.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Space_%28Otherworldly%29.mp3",
+    "durationHint": 112
+  },
+  {
+    "mwTitle": "Music-Underworld_(Otherworldly).mp3",
+    "path": "/images/Music-Underworld_%28Otherworldly%29.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Underworld_%28Otherworldly%29.mp3",
+    "durationHint": 93
+  },
+  {
+    "mwTitle": "Music-Arctic_(Snow)_(Otherworldly).mp3",
+    "path": "/images/Music-Arctic_%28Snow%29_%28Otherworldly%29.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Arctic_%28Snow%29_%28Otherworldly%29.mp3",
+    "durationHint": 91
+  },
+  {
+    "mwTitle": "Music-Corruption_(Otherworldly).mp3",
+    "path": "/images/Music-Corruption_%28Otherworldly%29.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Corruption_%28Otherworldly%29.mp3",
+    "durationHint": 92
+  },
+  {
+    "mwTitle": "Music-Underground_Corruption_(Otherworldly).mp3",
+    "path": "/images/Music-Underground_Corruption_%28Otherworldly%29.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Underground_Corruption_%28Otherworldly%29.mp3",
+    "durationHint": 92
+  },
+  {
+    "mwTitle": "Music-Crimson_(Otherworldly).mp3",
+    "path": "/images/Music-Crimson_%28Otherworldly%29.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Crimson_%28Otherworldly%29.mp3",
+    "durationHint": 101
+  },
+  {
+    "mwTitle": "Music-Underground_Crimson_(Otherworldly).mp3",
+    "path": "/images/Music-Underground_Crimson_%28Otherworldly%29.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Underground_Crimson_%28Otherworldly%29.mp3",
+    "durationHint": 106
+  },
+  {
+    "mwTitle": "Music-Ice_(Otherworldly).mp3",
+    "path": "/images/Music-Ice_%28Otherworldly%29.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Ice_%28Otherworldly%29.mp3",
+    "durationHint": 92
+  },
+  {
+    "mwTitle": "Music-Underground_Hallow_(Otherworldly).mp3",
+    "path": "/images/Music-Underground_Hallow_%28Otherworldly%29.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Underground_Hallow_%28Otherworldly%29.mp3",
+    "durationHint": 93
+  },
+  {
+    "mwTitle": "Music-Eerie_(Otherworldly).mp3",
+    "path": "/images/Music-Eerie_%28Otherworldly%29.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Eerie_%28Otherworldly%29.mp3",
+    "durationHint": 92
+  },
+  {
+    "mwTitle": "Music-Boss_2_(Otherworldly).mp3",
+    "path": "/images/Music-Boss_2_%28Otherworldly%29.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Boss_2_%28Otherworldly%29.mp3",
+    "durationHint": 101
+  },
+  {
+    "mwTitle": "Music-Boss_1_(Otherworldly).mp3",
+    "path": "/images/Music-Boss_1_%28Otherworldly%29.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Boss_1_%28Otherworldly%29.mp3",
+    "durationHint": 93
+  },
+  {
+    "mwTitle": "Music-Invasion_(Otherworldly).mp3",
+    "path": "/images/Music-Invasion_%28Otherworldly%29.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Invasion_%28Otherworldly%29.mp3",
+    "durationHint": 93
+  },
+  {
+    "mwTitle": "Music-The_Towers_(Otherworldly).mp3",
+    "path": "/images/Music-The_Towers_%28Otherworldly%29.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-The_Towers_%28Otherworldly%29.mp3",
+    "durationHint": 88
+  },
+  {
+    "mwTitle": "Music-Lunar_Boss_(Otherworldly).mp3",
+    "path": "/images/Music-Lunar_Boss_%28Otherworldly%29.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Lunar_Boss_%28Otherworldly%29.mp3",
+    "durationHint": 86
+  },
+  {
+    "mwTitle": "Music-Plantera_(Otherworldly).mp3",
+    "path": "/images/Music-Plantera_%28Otherworldly%29.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Plantera_%28Otherworldly%29.mp3",
+    "durationHint": 92
+  },
+  {
+    "mwTitle": "Music-Jungle_(Otherworldly).mp3",
+    "path": "/images/Music-Jungle_%28Otherworldly%29.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Jungle_%28Otherworldly%29.mp3",
+    "durationHint": 90
+  },
+  {
+    "mwTitle": "Music-Wall_of_Flesh_(Otherworldly).mp3",
+    "path": "/images/Music-Wall_of_Flesh_%28Otherworldly%29.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Wall_of_Flesh_%28Otherworldly%29.mp3",
+    "durationHint": 78
+  },
+  {
+    "mwTitle": "Music-Hallow_(Otherworldly).mp3",
+    "path": "/images/Music-Hallow_%28Otherworldly%29.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Hallow_%28Otherworldly%29.mp3",
+    "durationHint": 132
+  },
+  {
+    "mwTitle": "Music-Journey&#39;s_End.mp3",
+    "path": "/images/Music-Journey%27s_End.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Journey%27s_End.mp3",
+    "durationHint": 133
+  },
+  {
+    "mwTitle": "Music-Deerclops.mp3",
+    "path": "/images/Music-Deerclops.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Deerclops.mp3",
+    "durationHint": 94
+  },
+  {
+    "mwTitle": "Music-Aether.mp3",
+    "path": "/images/Music-Aether.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Aether.mp3",
+    "durationHint": 121
+  },
+  {
+    "mwTitle": "Music-The_Destroyer.mp3",
+    "path": "/images/Music-The_Destroyer.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-The_Destroyer.mp3",
+    "durationHint": 125
+  },
+  {
+    "mwTitle": "Music-King_Slime.mp3",
+    "path": "/images/Music-King_Slime.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-King_Slime.mp3",
+    "durationHint": 118
+  },
+  {
+    "mwTitle": "Music-Lunatic_Cultist.mp3",
+    "path": "/images/Music-Lunatic_Cultist.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Lunatic_Cultist.mp3",
+    "durationHint": 124
+  },
+  {
+    "mwTitle": "Music-Alternate_Queen_Bee.mp3",
+    "path": "/images/Music-Alternate_Queen_Bee.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Alternate_Queen_Bee.mp3",
+    "durationHint": 122
+  },
+  {
+    "mwTitle": "Music-Queen_Bee.mp3",
+    "path": "/images/Music-Queen_Bee.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Queen_Bee.mp3",
+    "durationHint": 113
+  },
+  {
+    "mwTitle": "Music-The_Twins.mp3",
+    "path": "/images/Music-The_Twins.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-The_Twins.mp3",
+    "durationHint": 130
+  },
+  {
+    "mwTitle": "Music-Skeletron_Prime.mp3",
+    "path": "/images/Music-Skeletron_Prime.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Skeletron_Prime.mp3",
+    "durationHint": 117
+  },
+  {
+    "mwTitle": "Music-Eater_of_Worlds.mp3",
+    "path": "/images/Music-Eater_of_Worlds.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Eater_of_Worlds.mp3",
+    "durationHint": 130
+  },
+  {
+    "mwTitle": "Music-Alternate_Torch_God.mp3",
+    "path": "/images/Music-Alternate_Torch_God.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Alternate_Torch_God.mp3",
+    "durationHint": 179
+  },
+  {
+    "mwTitle": "Music-Torch_God.mp3",
+    "path": "/images/Music-Torch_God.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Torch_God.mp3",
+    "durationHint": 173
+  },
+  {
+    "mwTitle": "Music-Rainbow_Boulder_(intro).mp3",
+    "path": "/images/Music-Rainbow_Boulder_%28intro%29.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Rainbow_Boulder_%28intro%29.mp3",
+    "durationHint": 38
+  },
+  {
+    "mwTitle": "Music-Rainbow_Boulder_(loop).mp3",
+    "path": "/images/Music-Rainbow_Boulder_%28loop%29.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Rainbow_Boulder_%28loop%29.mp3",
+    "durationHint": 35
+  },
+  {
+    "mwTitle": "Music-Skeletron.mp3",
+    "path": "/images/Music-Skeletron.mp3",
+    "url": "https://terraria.wiki.gg/images/Music-Skeletron.mp3",
+    "durationHint": 130
+  }
+]

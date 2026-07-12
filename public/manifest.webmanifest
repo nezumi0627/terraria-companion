@@ -3,8 +3,9 @@
   "short_name": "テラコン",
   "description": "Terrariaの進行を管理する非公式コンパニオンアプリ。欲しい装備から必要な素材・ボス・設備を自動でリスト化します。",
   "lang": "ja",
-  "start_url": "/",
-  "scope": "/",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#1B1F1A",
@@ -12,19 +13,19 @@
   "categories": ["games", "utilities"],
   "icons": [
     {
-      "src": "/icon-192.png",
+      "src": "icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icon-512.png",
+      "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icon-maskable.png",
+      "src": "icon-maskable.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
