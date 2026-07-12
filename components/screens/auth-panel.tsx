@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Cloud, CloudOff, Loader2, LogIn, LogOut, UserPlus, Sparkles, RefreshCw } from 'lucide-react'
 import { useAuth } from '@/lib/auth-store'
-import { cloudApiConfigured, cloudApiReady } from '@/lib/cloud-api'
+import { cloudApiConfigured, cloudApiReady, refreshCloudApiBase } from '@/lib/cloud-api'
 import { GITHUB_REPO } from '@/lib/github-users'
 import { haptic } from '@/lib/haptics'
 import { cn } from '@/lib/utils'
@@ -190,9 +190,24 @@ export function AuthPanel({ onFlash }: { onFlash: (msg: string) => void }) {
       </p>
 
       {!apiChecking && !apiOk && (
-        <p className="relative mb-3 rounded-xl border border-danger/20 bg-danger/10 px-3 py-2 text-[11px] text-danger">
-          クラウド API に未接続です。接続復旧までローカル保存のみ使えます。
-        </p>
+        <div className="relative mb-3 rounded-xl border border-danger/20 bg-danger/10 px-3 py-2 text-[11px] text-danger">
+          <p>クラウド API に未接続です。接続復旧までローカル保存のみ使えます。</p>
+          <button
+            type="button"
+            className="mt-2 inline-flex items-center gap-1 rounded-lg bg-danger/15 px-2.5 py-1 font-semibold text-danger"
+            onClick={() => {
+              setApiChecking(true)
+              void refreshCloudApiBase().then((base) => {
+                setApiOk(!!base)
+                setApiChecking(false)
+                onFlash(base ? 'クラウド API に再接続しました' : 'まだ接続できません。しばらくしてから再試行してください')
+              })
+            }}
+          >
+            <RefreshCw className="size-3" />
+            再接続を試す
+          </button>
+        </div>
       )}
 
       <div className="relative mb-3 flex gap-1 rounded-xl bg-background/60 p-1">

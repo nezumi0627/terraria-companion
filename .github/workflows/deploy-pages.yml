@@ -40,10 +40,18 @@ jobs:
 
       - name: Build static export
         env:
-          # Worker URL only — never bake GitHub PATs into the static bundle
-          NEXT_PUBLIC_CLOUD_API_URL: ${{ vars.CLOUD_API_URL || secrets.CLOUD_API_URL }}
+          # Durable Worker URL only. Ephemeral trycloudflare.com must NOT be baked in —
+          # the client discovers tunnel URLs from public/cloud-api-url.json at runtime.
+          NEXT_PUBLIC_CLOUD_API_URL: ${{ vars.CLOUD_API_URL }}
           NEXT_PUBLIC_GITHUB_REPO: ${{ github.repository }}
-        run: pnpm build
+        run: |
+          URL="${NEXT_PUBLIC_CLOUD_API_URL:-}"
+          if echo "$URL" | grep -qi 'trycloudflare\.com'; then
+            echo "Ignoring ephemeral tunnel URL in CLOUD_API_URL (use Worker URL or leave empty)"
+            unset NEXT_PUBLIC_CLOUD_API_URL
+            export NEXT_PUBLIC_CLOUD_API_URL=
+          fi
+          pnpm build
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

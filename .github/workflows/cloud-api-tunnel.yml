@@ -3,23 +3,31 @@ name: Cloud API (tunnel)
 # Runs the cloud API on a GitHub-hosted runner and publishes a public HTTPS URL
 # via Cloudflare Quick Tunnel (no Cloudflare account required).
 # Token stays in Actions secrets — never in the static Pages bundle.
+#
+# Prefer a durable Cloudflare Worker (deploy-cloud-api.yml) when CLOUDFLARE_*
+# secrets are available. This tunnel is a fallback (~5h lifetime).
 
 on:
   workflow_dispatch:
   schedule:
-    # Restart before the ~6h job limit
-    - cron: '0 */5 * * *'
+    # Restart before the ~6h job limit; 4h keeps overlap risk lower than 5h
+    - cron: '0 */4 * * *'
 
 concurrency:
+  # Do not cancel the live tunnel until the new one has published its URL.
+  # Overlap is brief: new job publishes first, then old job is cancelled by group? 
+  # Actually cancel-in-progress:false allows two runners. We cancel the previous
+  # run explicitly AFTER publishing the new URL.
   group: cloud-api-tunnel
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   api:
     runs-on: ubuntu-latest
-    timeout-minutes: 350
+    timeout-minutes: 290
     permissions:
       contents: write
+      actions: write
     steps:
       - uses: actions/checkout@v4
 
@@ -86,6 +94,19 @@ jobs:
             git commit -m "chore(cloud): refresh API tunnel URL"
             git push
           fi
+
+      - name: Cancel previous tunnel runs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # After the new URL is live, stop older in-progress tunnel jobs to free runners
+          CURRENT="${{ github.run_id }}"
+          gh api "repos/${{ github.repository }}/actions/workflows/cloud-api-tunnel.yml/runs?status=in_progress&per_page=10" \
+            --jq '.workflow_runs[] | select(.id != '"$CURRENT"') | .id' \
+            | while read -r id; do
+                echo "Cancelling old run $id"
+                gh api -X POST "repos/${{ github.repository }}/actions/runs/$id/cancel" || true
+              done
 
       - name: Keep tunnel alive
         run: |

@@ -18,7 +18,7 @@ const KIND_META: Record<ChecklistEntry["kind"], { label: string; verb: string }>
   npc: { label: "NPC解放", verb: "解放した" },
 }
 
-const ORDER: ChecklistEntry["kind"][] = ["boss", "event", "biome", "material", "craft", "station", "npc"]
+const ORDER: ChecklistEntry["kind"][] = ["station", "boss", "event", "biome", "material", "craft", "npc"]
 
 function toggleFor(s: AppState, e: ChecklistEntry) {
   switch (e.kind) {

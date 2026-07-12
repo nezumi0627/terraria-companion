@@ -150,12 +150,43 @@ export function ItemDetail({ id }: { id: string }) {
         <div className="flex flex-col gap-3">
           {item.recipe && (
             <Section title="レシピ">
+              {(() => {
+                const st = item.recipe?.stationId ? stationMap.get(item.recipe.stationId) : null
+                if (!st) {
+                  return (
+                    <div className="mb-2 flex items-center gap-2 rounded-xl border border-dashed border-border bg-background/40 px-3 py-2.5">
+                      <Hammer className="size-4 shrink-0 text-muted-foreground" />
+                      <span className="text-sm text-muted-foreground">素手で合成（作業設備なし）</span>
+                    </div>
+                  )
+                }
+                return (
+                  <button
+                    type="button"
+                    onClick={() => openEntity("station", st.id)}
+                    className="mb-2 flex w-full items-center gap-3 rounded-xl border border-grass/25 bg-grass/10 px-3 py-2.5 text-left transition hover:bg-grass/15"
+                  >
+                    <GlyphTile glyph={st.glyph} color={st.color} image={iconSrc(st.id)} size={40} glow />
+                    <div className="min-w-0 flex-1">
+                      <div className="text-[10px] font-semibold tracking-wide text-grass">作業設備</div>
+                      <div className="truncate text-sm font-bold text-foreground">{st.name}</div>
+                      <div className="truncate text-[11px] text-muted-foreground">ここで合成します · タップで詳細</div>
+                    </div>
+                    <ArrowRight className="size-4 shrink-0 text-grass/80" />
+                  </button>
+                )
+              })()}
               <div className="flex flex-col gap-1.5">
                 {item.recipe.ingredients.map((ing) => {
                   const child = itemMap.get(ing.itemId)
                   if (!child) return null
                   return (
-                    <button key={ing.itemId} onClick={() => openItem(ing.itemId)} className="flex items-center gap-2.5 rounded-lg bg-card/60 px-2 py-1.5 text-left">
+                    <button
+                      key={ing.itemId}
+                      type="button"
+                      onClick={() => openItem(ing.itemId)}
+                      className="flex items-center gap-2.5 rounded-lg bg-card/60 px-2 py-1.5 text-left"
+                    >
                       <GlyphTile glyph={child.glyph} color={child.color} image={iconSrc(child.id)} size={30} />
                       <span className="flex-1 truncate text-sm">{child.name}</span>
                       <span className="rounded bg-grass/15 px-1.5 text-xs font-bold text-grass">×{ing.count}</span>
@@ -163,19 +194,12 @@ export function ItemDetail({ id }: { id: string }) {
                   )
                 })}
               </div>
-              {(() => {
-                const st = item.recipe?.stationId ? stationMap.get(item.recipe.stationId) : null
-                return (
-                  <div className="mt-1.5 flex items-center gap-2 rounded-lg border border-dashed border-border bg-background/40 px-2 py-1.5">
-                    <Hammer className="size-3.5 shrink-0 text-muted-foreground" />
-                    <span className="text-[11px] text-muted-foreground">
-                      {st ? `${st.name} で合成` : "素手で合成"}
-                    </span>
-                    <ArrowRight className="ml-auto size-3.5 shrink-0 text-muted-foreground/60" />
-                    <span className="truncate text-[11px] font-semibold text-foreground">{item.name}</span>
-                  </div>
-                )
-              })()}
+              <div className="mt-1.5 flex items-center gap-2 px-1 text-[11px] text-muted-foreground">
+                <ArrowRight className="size-3.5 shrink-0" />
+                <span>
+                  材料を揃えて合成 → <span className="font-semibold text-foreground">{item.name}</span>
+                </span>
+              </div>
             </Section>
           )}
 
