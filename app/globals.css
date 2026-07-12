@@ -225,6 +225,11 @@
     width: calc(100% + 2rem);
     max-width: 100vw;
   }
+  @media (orientation: landscape) {
+    .home-pager-host {
+      max-width: 100%;
+    }
+  }
   .home-pager {
     display: flex;
     width: 100%;
@@ -252,8 +257,8 @@
     background: color-mix(in oklab, var(--muted) 80%, transparent);
   }
 
-  .ambient-immersive .terraria-sky {
-    filter: saturate(1.08) brightness(1.05);
+  .ambient-immersive {
+    filter: saturate(1.06) brightness(1.03);
   }
 }
 
@@ -326,13 +331,10 @@
 }
 
 .terraria-sky {
-  background:
-    radial-gradient(120% 70% at 50% -5%, #3a4a2e 0%, transparent 55%),
-    linear-gradient(180deg, #1a2230 0%, #24301f 42%, #1b1f1a 78%, #14170f 100%);
-  animation: sky-shift 28s ease-in-out infinite;
+  /* fallback if referenced elsewhere — live sky is inline in AmbientBackground */
+  background: linear-gradient(180deg, #5a9fc4 0%, #3a5a38 70%, #2a3a28 100%);
 }
 
 .terraria-sun {
   background: radial-gradient(circle, color-mix(in oklab, #f2c94c 55%, transparent), transparent 70%);
-  animation: star-twinkle 7s ease-in-out infinite;
 }

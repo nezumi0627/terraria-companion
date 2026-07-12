@@ -180,7 +180,7 @@ export function HomeScreen() {
       </div>
       <p className="mt-1.5 text-[11px] text-muted-foreground">
         {userId && (syncing ? 'クラウドへ同期中… · ' : 'クラウド同期オン · ')}
-        左スワイプで世界時計
+        左スワイプで世界時計（時間帯で空が変わります）
       </p>
     </header>
   )
@@ -381,11 +381,8 @@ export function HomeScreen() {
 
   return (
     <div className="flex flex-col gap-2">
-      {/* Landscape: normal dashboard only */}
-      <div className="hidden landscape:block">{homeBody}</div>
-
-      {/* Portrait: screensaver | home */}
-      <div className="home-pager-host -mx-4 landscape:hidden">
+      {/* screensaver | home — portrait & landscape */}
+      <div className="home-pager-host -mx-4">
         <div
           ref={pagerRef}
           className="home-pager flex touch-pan-x overflow-x-auto overscroll-x-contain no-scrollbar"
@@ -400,7 +397,7 @@ export function HomeScreen() {
             className="home-pager-page box-border shrink-0 snap-center snap-always px-4"
             style={pageWidth > 0 ? { width: pageWidth, flex: `0 0 ${pageWidth}px` } : { width: '100%', flex: '0 0 100%' }}
           >
-            {homeBody}
+            <div className="landscape:mx-auto landscape:max-w-2xl">{homeBody}</div>
           </section>
         </div>
 
