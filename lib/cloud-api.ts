@@ -47,15 +47,26 @@ function clearDiscovery() {
 
 async function fetchUrlJson(): Promise<string | undefined> {
   if (typeof window === 'undefined') return undefined
-  try {
-    const res = await fetch(publicUrl('/cloud-api-url.json'), { cache: 'no-store' })
-    if (!res.ok) return undefined
-    const json = (await res.json()) as { url?: string }
-    if (!json.url) return undefined
-    return normalizeBase(String(json.url))
-  } catch {
-    return undefined
+
+  const repo = process.env.NEXT_PUBLIC_GITHUB_REPO?.trim() || 'nezumi0627/terraria-companion'
+  const candidates = [
+    // Tunnel bot commits with GITHUB_TOKEN do not trigger Pages — read main tip directly
+    `https://raw.githubusercontent.com/${repo}/main/public/cloud-api-url.json`,
+    publicUrl('/cloud-api-url.json'),
+  ]
+
+  for (const src of candidates) {
+    try {
+      const res = await fetch(src, { cache: 'no-store' })
+      if (!res.ok) continue
+      const json = (await res.json()) as { url?: string }
+      if (!json.url) continue
+      return normalizeBase(String(json.url))
+    } catch {
+      /* try next */
+    }
   }
+  return undefined
 }
 
 async function probeHealth(base: string): Promise<boolean> {
