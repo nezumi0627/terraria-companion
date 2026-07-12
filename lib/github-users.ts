@@ -1,20 +1,11 @@
 /**
- * GitHub Contents API helpers for per-user save files under users/{id}.json
+ * User ID / PIN validation + cloud user file types.
+ * GitHub Contents writes go through the Worker (`lib/cloud-api.ts`), not the browser.
  */
+import { cloudApiConfigured, cloudFetch } from '@/lib/cloud-api'
+
 export const GITHUB_REPO =
   process.env.NEXT_PUBLIC_GITHUB_REPO || 'nezumi0627/terraria-companion'
-
-/** Contents: Write（users/ 配下の読み書き用）。未設定時は FEEDBACK トークンにフォールバック */
-export function githubDataToken(): string | undefined {
-  return (
-    process.env.NEXT_PUBLIC_GITHUB_DATA_TOKEN ||
-    process.env.NEXT_PUBLIC_FEEDBACK_GITHUB_TOKEN ||
-    undefined
-  )
-}
-
-const API = 'https://api.github.com'
-const API_VER = '2022-11-28'
 
 export function assertValidUserId(id: string): string | null {
   const t = id.trim()
@@ -48,83 +39,51 @@ export interface UserFile {
   state: Record<string, unknown>
 }
 
-export interface GhFileResult {
-  file: UserFile
+export interface CloudAuthResult {
+  ok: true
+  userId: string
   sha: string
+  updatedAt: number
+  state: Record<string, unknown>
 }
 
-function authHeaders(token: string): HeadersInit {
-  return {
-    Accept: 'application/vnd.github+json',
-    Authorization: `Bearer ${token}`,
-    'X-GitHub-Api-Version': API_VER,
-  }
+export interface CloudSaveResult {
+  ok: true
+  sha: string
+  updatedAt: number
 }
 
-function encodeContent(obj: unknown): string {
-  const json = JSON.stringify(obj, null, 2)
-  // btoa needs binary string; handle unicode
-  return btoa(unescape(encodeURIComponent(json)))
+/** @deprecated Prefer cloudApiConfigured — kept for older call sites */
+export function githubDataToken(): string | undefined {
+  return cloudApiConfigured() ? 'cloud-api' : undefined
 }
 
-function decodeContent(b64: string): string {
-  return decodeURIComponent(escape(atob(b64)))
-}
-
-export async function fetchUserFile(userId: string): Promise<GhFileResult | null> {
-  const path = userFilePath(userId)
-  const token = githubDataToken()
-  const headers: HeadersInit = {
-    Accept: 'application/vnd.github+json',
-    'X-GitHub-Api-Version': API_VER,
-  }
-  if (token) Object.assign(headers, { Authorization: `Bearer ${token}` })
-
-  const res = await fetch(`${API}/repos/${GITHUB_REPO}/contents/${path}`, { headers })
-  if (res.status === 404) return null
-  if (!res.ok) {
-    const t = await res.text().catch(() => '')
-    throw new Error(`読み込み失敗（${res.status}）${t ? `: ${t.slice(0, 100)}` : ''}`)
-  }
-  const json = (await res.json()) as { content?: string; sha?: string; encoding?: string }
-  if (!json.content || !json.sha) throw new Error('ユーザーファイルの形式が不正です')
-  const raw = decodeContent(json.content.replace(/\n/g, ''))
-  const file = JSON.parse(raw) as UserFile
-  return { file, sha: json.sha }
-}
-
-export async function putUserFile(
-  userFile: UserFile,
-  sha?: string,
-): Promise<{ sha: string }> {
-  const token = githubDataToken()
-  if (!token) throw new Error('GitHub データ用トークンが設定されていません')
-
-  const path = userFilePath(userFile.id)
-  const body: Record<string, unknown> = {
-    message: `chore(users): sync ${userFile.id}`,
-    content: encodeContent(userFile),
-    committer: {
-      name: 'terraria-companion',
-      email: '41898282+github-actions[bot]@users.noreply.github.com',
-    },
-  }
-  if (sha) body.sha = sha
-
-  const res = await fetch(`${API}/repos/${GITHUB_REPO}/contents/${path}`, {
-    method: 'PUT',
-    headers: {
-      ...authHeaders(token),
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(body),
+export async function registerCloudUser(
+  userId: string,
+  pinHash: string,
+  state: Record<string, unknown>,
+): Promise<CloudAuthResult> {
+  return cloudFetch<CloudAuthResult>('/register', {
+    method: 'POST',
+    json: { id: userId, pinHash, state },
   })
-  if (!res.ok) {
-    const t = await res.text().catch(() => '')
-    throw new Error(`保存失敗（${res.status}）${t ? `: ${t.slice(0, 120)}` : ''}`)
-  }
-  const json = (await res.json()) as { content?: { sha?: string } }
-  const nextSha = json.content?.sha
-  if (!nextSha) throw new Error('保存後の sha が取得できませんでした')
-  return { sha: nextSha }
+}
+
+export async function loginCloudUser(userId: string, pinHash: string): Promise<CloudAuthResult> {
+  return cloudFetch<CloudAuthResult>('/login', {
+    method: 'POST',
+    json: { id: userId, pinHash },
+  })
+}
+
+export async function saveCloudUser(
+  userId: string,
+  pinHash: string,
+  state: Record<string, unknown>,
+  sha?: string,
+): Promise<CloudSaveResult> {
+  return cloudFetch<CloudSaveResult>('/save', {
+    method: 'PUT',
+    json: { id: userId, pinHash, state, sha },
+  })
 }

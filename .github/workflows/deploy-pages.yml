@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths-ignore:
       - 'users/**'
+      - 'workers/**'
   workflow_dispatch:
 
 permissions:
@@ -39,9 +40,8 @@ jobs:
 
       - name: Build static export
         env:
-          NEXT_PUBLIC_FEEDBACK_GITHUB_TOKEN: ${{ secrets.FEEDBACK_GITHUB_TOKEN }}
-          NEXT_PUBLIC_FEEDBACK_DISPATCH_TOKEN: ${{ secrets.FEEDBACK_DISPATCH_TOKEN }}
-          NEXT_PUBLIC_GITHUB_DATA_TOKEN: ${{ secrets.GITHUB_DATA_TOKEN || secrets.FEEDBACK_GITHUB_TOKEN }}
+          # Worker URL only — never bake GitHub PATs into the static bundle
+          NEXT_PUBLIC_CLOUD_API_URL: ${{ vars.CLOUD_API_URL || secrets.CLOUD_API_URL }}
           NEXT_PUBLIC_GITHUB_REPO: ${{ github.repository }}
         run: pnpm build
 

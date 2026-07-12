@@ -1,0 +1,10 @@
+name = "terraria-companion-api"
+main = "src/index.js"
+compatibility_date = "2025-07-01"
+
+# Set with: npx wrangler secret put GH_TOKEN
+# (GitHub PAT with Contents + Issues on the companion repo)
+
+[vars]
+GITHUB_REPO = "nezumi0627/terraria-companion"
+ALLOWED_ORIGINS = "https://nezumi0627.github.io,http://localhost:3000,http://127.0.0.1:3000"

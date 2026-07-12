@@ -45,14 +45,33 @@ export function HomeScreen() {
 
   return (
     <div className="flex flex-col gap-5">
-      <header className="pt-2">
-        <p className="text-sm text-muted-foreground">{greeting()}</p>
-        <h1 className="font-display text-2xl text-balance text-glow-gold">テラリア コンパニオン</h1>
+      <header className="relative overflow-hidden pt-2">
+        <motion.p
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-sm text-muted-foreground"
+        >
+          {greeting()}
+        </motion.p>
+        <motion.h1
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+          className="font-display text-2xl text-balance text-glow-gold"
+        >
+          テラリア コンパニオン
+        </motion.h1>
       </header>
 
       {/* overall progress card */}
-      <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-card to-secondary/30 p-4">
-        <div className="flex items-center justify-between">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.08 }}
+        className="relative overflow-hidden rounded-2xl border border-grass/20 bg-gradient-to-br from-card via-card to-grass/10 p-4"
+      >
+        <div className="pointer-events-none absolute -right-8 -top-10 size-36 rounded-full bg-gold/10 blur-3xl" />
+        <div className="relative flex items-center justify-between">
           <div>
             <div className="text-xs text-muted-foreground">全体の攻略度</div>
             <div className="font-display text-3xl text-grass">{overall}%</div>
@@ -60,19 +79,20 @@ export function HomeScreen() {
           <div className="text-right text-xs text-muted-foreground">
             <div>討伐ボス {defeatedCount}/{timelineBosses.length}</div>
             {nextBoss && (
-              <button onClick={() => useUi.getState().openEntity("boss", nextBoss.id)} className="mt-1 inline-flex items-center gap-1 text-grass">
+              <button onClick={() => useUi.getState().openEntity("boss", nextBoss.id)} className="mt-1 inline-flex items-center gap-1 text-grass transition hover:brightness-125">
                 次: {nextBoss.name}
                 <ChevronRight className="size-3" />
               </button>
             )}
           </div>
         </div>
-        <div className="mt-3">
+        <div className="relative mt-3">
           <ProgressBar value={overall} />
         </div>
-      </div>
+      </motion.div>
 
       {/* tracked goals */}
+
       <section>
         <div className="mb-2 flex items-center justify-between">
           <h2 className="flex items-center gap-1.5 text-sm font-bold">

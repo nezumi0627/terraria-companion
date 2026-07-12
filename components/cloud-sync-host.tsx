@@ -3,12 +3,13 @@
 import { useEffect, useRef } from 'react'
 import { useAuth } from '@/lib/auth-store'
 import { useStore } from '@/lib/store'
-import { fetchUserFile, githubDataToken, hashPin } from '@/lib/github-users'
+import { cloudApiReady } from '@/lib/cloud-api'
+import { hashPin, loginCloudUser } from '@/lib/github-users'
 
 const SAVE_DEBOUNCE_MS = 2500
 
 /**
- * When logged in: pull cloud save on mount, and debounce-push local changes to users/{id}.json
+ * When logged in: pull cloud save on mount, and debounce-push local changes via cloud API.
  */
 export function CloudSyncHost() {
   const userId = useAuth((s) => s.userId)
@@ -20,25 +21,24 @@ export function CloudSyncHost() {
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const skipNext = useRef(false)
 
-  // Re-validate + pull on boot when session exists
   useEffect(() => {
-    if (!hydrated || !userId || !pin || !githubDataToken()) return
+    if (!hydrated || !userId || !pin) return
     let cancelled = false
     ;(async () => {
+      if (!(await cloudApiReady())) return
       try {
-        const got = await fetchUserFile(userId)
-        if (cancelled || !got) return
         const pinHash = await hashPin(userId, pin)
-        if (pinHash !== got.file.pinHash) {
-          useAuth.getState().logout()
-          return
-        }
+        const got = await loginCloudUser(userId, pinHash)
+        if (cancelled) return
         skipNext.current = true
-        importState(got.file.state || {})
+        importState(got.state || {})
         setFileSha(got.sha)
-        useAuth.setState({ lastSyncedAt: got.file.updatedAt, status: 'ready' })
-      } catch {
-        /* keep local session; next save may refresh */
+        useAuth.setState({ lastSyncedAt: got.updatedAt, status: 'ready' })
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : ''
+        if (msg.includes('パスワード') || msg.includes('見つかりません')) {
+          useAuth.getState().logout()
+        }
       }
     })()
     return () => {
@@ -46,7 +46,6 @@ export function CloudSyncHost() {
     }
   }, [hydrated, userId, pin, importState, setFileSha])
 
-  // Debounced upload on store changes
   useEffect(() => {
     if (!userId || !pin) return
     const unsub = useStore.subscribe(() => {

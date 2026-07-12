@@ -1,4 +1,5 @@
 import { publicUrl } from '@/lib/public-url'
+import { cloudApiReady, cloudFetch } from '@/lib/cloud-api'
 
 export const FEEDBACK_REPO =
   process.env.NEXT_PUBLIC_GITHUB_REPO || 'nezumi0627/terraria-companion'
@@ -76,16 +77,12 @@ function markCooldown() {
 }
 
 /**
- * Send feedback as a GitHub Issue (fully automatic when a token is configured).
- *
- * Build-time env:
- * - NEXT_PUBLIC_FEEDBACK_GITHUB_TOKEN — fine-grained PAT with Issues: Write only
- * - NEXT_PUBLIC_FEEDBACK_DISPATCH_TOKEN — optional PAT that can fire repository_dispatch
- * - NEXT_PUBLIC_GITHUB_REPO — owner/name
+ * Send feedback as a GitHub Issue via cloud Worker when configured.
+ * Falls back to opening a pre-filled New Issue page (no token in the browser).
  */
 export async function submitFeedback(payload: FeedbackPayload): Promise<FeedbackResult> {
   if (payload.website) {
-    return { ok: true, mode: 'api' } // honeypot — pretend success
+    return { ok: true, mode: 'api' }
   }
 
   const title = payload.title.trim().slice(0, 120)
@@ -99,76 +96,30 @@ export async function submitFeedback(payload: FeedbackPayload): Promise<Feedback
 
   const issueTitle = `[フィードバック/${CATEGORY_LABEL[payload.category]}] ${title}`
   const issueBody = buildIssueBody(payload)
-  const token = process.env.NEXT_PUBLIC_FEEDBACK_GITHUB_TOKEN
-  const dispatchToken = process.env.NEXT_PUBLIC_FEEDBACK_DISPATCH_TOKEN
 
-  if (token) {
+  if (await cloudApiReady()) {
     try {
-      const res = await fetch(`https://api.github.com/repos/${FEEDBACK_REPO}/issues`, {
+      const data = await cloudFetch<{ ok: boolean; url?: string | null }>('/feedback', {
         method: 'POST',
-        headers: {
-          Accept: 'application/vnd.github+json',
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-          'X-GitHub-Api-Version': '2022-11-28',
+        json: {
+          category: payload.category,
+          title,
+          body: bodyText,
+          website: payload.website || '',
+          page: typeof location !== 'undefined' ? location.href : '',
+          ua: typeof navigator !== 'undefined' ? navigator.userAgent : '',
         },
-        body: JSON.stringify({
-          title: issueTitle,
-          body: issueBody,
-          labels: [
-            'feedback',
-            payload.category === 'bug' ? 'bug' : payload.category === 'idea' ? 'enhancement' : 'feedback',
-          ],
-        }),
       })
-      if (res.ok) {
-        const json = (await res.json()) as { html_url?: string }
-        markCooldown()
-        return { ok: true, mode: 'api', url: json.html_url }
+      markCooldown()
+      return { ok: true, mode: 'api', url: data.url || undefined }
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : '送信に失敗しました'
+      // Fall through to redirect so users can still report
+      if (!msg.includes('多すぎ')) {
+        /* continue to redirect */
+      } else {
+        return { ok: false, mode: 'api', error: msg }
       }
-      if (res.status !== 401 && res.status !== 403) {
-        const detail = await res.text().catch(() => '')
-        return {
-          ok: false,
-          mode: 'api',
-          error: `Issue の作成に失敗しました（${res.status}）${detail ? `: ${detail.slice(0, 120)}` : ''}`,
-        }
-      }
-    } catch {
-      /* fall through */
-    }
-  }
-
-  // Secondary: repository_dispatch → Actions creates the issue with GITHUB_TOKEN
-  if (dispatchToken) {
-    try {
-      const res = await fetch(`https://api.github.com/repos/${FEEDBACK_REPO}/dispatches`, {
-        method: 'POST',
-        headers: {
-          Accept: 'application/vnd.github+json',
-          Authorization: `Bearer ${dispatchToken}`,
-          'Content-Type': 'application/json',
-          'X-GitHub-Api-Version': '2022-11-28',
-        },
-        body: JSON.stringify({
-          event_type: 'app-feedback',
-          client_payload: {
-            title: issueTitle,
-            body: issueBody,
-            category: payload.category,
-          },
-        }),
-      })
-      if (res.status === 204 || res.ok) {
-        markCooldown()
-        return {
-          ok: true,
-          mode: 'api',
-          url: `https://github.com/${FEEDBACK_REPO}/issues`,
-        }
-      }
-    } catch {
-      /* fall through */
     }
   }
 

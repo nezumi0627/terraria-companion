@@ -1,0 +1,100 @@
+name: Cloud API (tunnel)
+
+# Runs the cloud API on a GitHub-hosted runner and publishes a public HTTPS URL
+# via Cloudflare Quick Tunnel (no Cloudflare account required).
+# Token stays in Actions secrets — never in the static Pages bundle.
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Restart before the ~6h job limit
+    - cron: '0 */5 * * *'
+
+concurrency:
+  group: cloud-api-tunnel
+  cancel-in-progress: true
+
+jobs:
+  api:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Start API server
+        env:
+          GH_TOKEN: ${{ secrets.CLOUD_API_GITHUB_TOKEN }}
+          GITHUB_REPO: ${{ github.repository }}
+          PORT: '8787'
+          ALLOWED_ORIGINS: 'https://nezumi0627.github.io,http://localhost:3000,http://127.0.0.1:3000'
+        run: |
+          node scripts/cloud-api-server.mjs > /tmp/cloud-api.log 2>&1 &
+          echo $! > /tmp/cloud-api.pid
+          for i in $(seq 1 30); do
+            if curl -fsS "http://127.0.0.1:8787/health" >/dev/null; then
+              echo "API ready"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "API failed to start"; cat /tmp/cloud-api.log; exit 1
+
+      - name: Install cloudflared
+        run: |
+          curl -fsSL -o cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
+          sudo dpkg -i cloudflared.deb
+          cloudflared --version
+
+      - name: Start quick tunnel
+        id: tunnel
+        run: |
+          cloudflared tunnel --url http://127.0.0.1:8787 > /tmp/cloudflared.log 2>&1 &
+          echo $! > /tmp/cloudflared.pid
+          URL=""
+          for i in $(seq 1 60); do
+            URL=$(grep -oE 'https://[a-zA-Z0-9-]+\.trycloudflare\.com' /tmp/cloudflared.log | head -n1 || true)
+            if [ -n "$URL" ]; then
+              echo "tunnel-url=$URL" >> "$GITHUB_OUTPUT"
+              echo "Public API: $URL"
+              exit 0
+            fi
+            if ! kill -0 "$(cat /tmp/cloudflared.pid)" 2>/dev/null; then
+              echo "cloudflared exited"; cat /tmp/cloudflared.log; exit 1
+            fi
+            sleep 2
+          done
+          echo "Timed out waiting for tunnel URL"; cat /tmp/cloudflared.log; exit 1
+
+      - name: Publish API URL for the app
+        env:
+          TUNNEL_URL: ${{ steps.tunnel.outputs.tunnel-url }}
+        run: |
+          mkdir -p public
+          printf '%s\n' "{\"url\":\"$TUNNEL_URL\",\"updatedAt\":$(date +%s000),\"source\":\"actions-tunnel\"}" > public/cloud-api-url.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/cloud-api-url.json
+          if git diff --staged --quiet; then
+            echo "URL unchanged"
+          else
+            git commit -m "chore(cloud): refresh API tunnel URL"
+            git push
+          fi
+
+      - name: Keep tunnel alive
+        run: |
+          echo "Keeping cloud API alive until job timeout…"
+          while kill -0 "$(cat /tmp/cloud-api.pid)" 2>/dev/null && kill -0 "$(cat /tmp/cloudflared.pid)" 2>/dev/null; do
+            sleep 60
+            curl -fsS "http://127.0.0.1:8787/health" >/dev/null || exit 1
+          done
+          echo "Process exited early"
+          cat /tmp/cloud-api.log || true
+          cat /tmp/cloudflared.log || true
+          exit 1
