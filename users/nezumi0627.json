@@ -1,7 +1,7 @@
 {
   "id": "nezumi0627",
   "pinHash": "8f85d66000972c4a741f930c122227e60fee5c453d7e1b373e229834f76e8d76",
-  "updatedAt": 1783898243814,
+  "updatedAt": 1783898247108,
   "state": {
     "owned": {},
     "defeatedBosses": {},
@@ -21,6 +21,11 @@
       "ガイド"
     ],
     "recentViews": [
+      {
+        "kind": "item",
+        "id": "classy-cane",
+        "at": 1783898244345
+      },
       {
         "kind": "item",
         "id": "stylish-scissors",
@@ -115,11 +120,6 @@
         "kind": "item",
         "id": "demonite-ore",
         "at": 1783876390383
-      },
-      {
-        "kind": "boss",
-        "id": "king-slime",
-        "at": 1783874947414
       }
     ],
     "dailyTasks": [],
