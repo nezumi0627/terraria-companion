@@ -1,7 +1,7 @@
 {
   "id": "nezumi0627",
   "pinHash": "8f85d66000972c4a741f930c122227e60fee5c453d7e1b373e229834f76e8d76",
-  "updatedAt": 1783897716135,
+  "updatedAt": 1783897721056,
   "state": {
     "owned": {},
     "defeatedBosses": {},
@@ -16,10 +16,16 @@
     "goals": [],
     "favorites": {},
     "recentSearches": [
+      "キノコの帽子",
       "木の剣",
       "ガイド"
     ],
     "recentViews": [
+      {
+        "kind": "item",
+        "id": "mushroom-cap",
+        "at": 1783897718247
+      },
       {
         "kind": "item",
         "id": "wooden-sword",
