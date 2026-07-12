@@ -1,0 +1,25 @@
+name: Feedback
+description: アプリ内フィードバックから作成された Issue
+labels: ["feedback"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        アプリの設定画面から送られたフィードバック用テンプレートです。
+  - type: dropdown
+    id: category
+    attributes:
+      label: 種別
+      options:
+        - バグ報告
+        - アイデア
+        - その他
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: 内容
+      description: 詳しい内容・再現手順など
+    validations:
+      required: true

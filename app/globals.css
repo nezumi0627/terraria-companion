@@ -1,0 +1,286 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Terraria world palette */
+  --color-forest: var(--forest);
+  --color-grass: var(--grass);
+  --color-stone: var(--stone);
+  --color-wood: var(--wood);
+  --color-gold: var(--gold);
+  --color-magic: var(--magic);
+  --color-danger: var(--danger);
+  --color-success: var(--success);
+  --color-copper: var(--copper);
+  --color-sand: var(--sand);
+  --color-sky: var(--sky);
+  --color-ash: var(--ash);
+  --color-crimson: var(--crimson);
+  --color-lilac: var(--lilac);
+  --color-boss: var(--boss);
+  --color-steel: var(--steel);
+  --color-pink: var(--pink);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --font-sans: var(--font-body);
+  --font-serif: var(--font-display);
+  --font-display: var(--font-display);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+}
+
+/* The app is dark-fantasy first. Default (root) is the dark theme. */
+:root {
+  color-scheme: dark;
+  --radius: 0.9rem;
+
+  --background: #1b1f1a;
+  --foreground: #eef3ea;
+
+  --card: #23281f;
+  --card-foreground: #eef3ea;
+  --popover: #23281f;
+  --popover-foreground: #eef3ea;
+
+  --primary: #49a84a;
+  --primary-foreground: #0f130d;
+
+  --secondary: #2f6b3d;
+  --secondary-foreground: #eef3ea;
+
+  --muted: #2a2f26;
+  --muted-foreground: #9aa593;
+
+  --accent: #f2c94c;
+  --accent-foreground: #221a05;
+
+  --destructive: #e57373;
+
+  --border: color-mix(in oklab, #eef3ea 12%, transparent);
+  --input: color-mix(in oklab, #eef3ea 10%, transparent);
+  --ring: #49a84a;
+
+  /* world palette */
+  --forest: #2f6b3d;
+  --grass: #49a84a;
+  --stone: #565656;
+  --wood: #8b5a2b;
+  --gold: #f2c94c;
+  --magic: #6ec6ff;
+  --danger: #e57373;
+  --success: #66bb6a;
+  --copper: #c47a4a;
+  --sand: #d2b48c;
+  --sky: #7eb6d9;
+  --ash: #6b6560;
+  --crimson: #c44545;
+  --lilac: #b388ff;
+  --boss: #ff8a65;
+  --steel: #8a9aa8;
+  --pink: #f48fb1;
+
+  --chart-1: #49a84a;
+  --chart-2: #f2c94c;
+  --chart-3: #6ec6ff;
+  --chart-4: #8b5a2b;
+  --chart-5: #e57373;
+
+  --sidebar: #23281f;
+  --sidebar-foreground: #eef3ea;
+  --sidebar-primary: #49a84a;
+  --sidebar-primary-foreground: #0f130d;
+  --sidebar-accent: #2f6b3d;
+  --sidebar-accent-foreground: #eef3ea;
+  --sidebar-border: color-mix(in oklab, #eef3ea 12%, transparent);
+  --sidebar-ring: #49a84a;
+}
+
+/* Optional lighter parchment theme */
+.light {
+  color-scheme: light;
+  --background: #eae4d6;
+  --foreground: #221f18;
+  --card: #f4efe4;
+  --card-foreground: #221f18;
+  --popover: #f4efe4;
+  --popover-foreground: #221f18;
+  --primary: #2f6b3d;
+  --primary-foreground: #f7f4ec;
+  --secondary: #d8cfba;
+  --secondary-foreground: #221f18;
+  --muted: #ddd5c2;
+  --muted-foreground: #6b6553;
+  --accent: #c99a2e;
+  --accent-foreground: #201804;
+  --destructive: #c0392b;
+  --border: color-mix(in oklab, #221f18 14%, transparent);
+  --input: color-mix(in oklab, #221f18 12%, transparent);
+  --ring: #2f6b3d;
+  --sidebar: #f4efe4;
+  --sidebar-foreground: #221f18;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html,
+  body {
+    @apply bg-background text-foreground;
+  }
+  body {
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: none;
+  }
+}
+
+@layer utilities {
+  /* thin scrollbars, hidden where appropriate */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .glass {
+    background: color-mix(in oklab, var(--card) 72%, transparent);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  .text-glow-gold {
+    text-shadow: 0 0 12px color-mix(in oklab, var(--gold) 55%, transparent);
+  }
+  .text-glow-magic {
+    text-shadow: 0 0 12px color-mix(in oklab, var(--magic) 55%, transparent);
+  }
+
+  .safe-bottom {
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px));
+  }
+  .safe-top {
+    padding-top: calc(env(safe-area-inset-top, 0px));
+  }
+}
+
+@keyframes float-up {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0;
+  }
+  10% {
+    opacity: var(--p-opacity, 0.6);
+  }
+  90% {
+    opacity: var(--p-opacity, 0.6);
+  }
+  100% {
+    transform: translateY(-120vh) scale(1.1);
+    opacity: 0;
+  }
+}
+
+@keyframes grass-sway {
+  0%,
+  100% {
+    transform: skewX(-4deg);
+  }
+  50% {
+    transform: skewX(4deg);
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--primary) 40%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 22px 2px color-mix(in oklab, var(--primary) 45%, transparent);
+  }
+}
+
+@keyframes cloud-drift {
+  0% {
+    left: -30%;
+  }
+  100% {
+    left: 110%;
+  }
+}
+
+@keyframes star-twinkle {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+@keyframes sky-shift {
+  0%,
+  100% {
+    filter: hue-rotate(0deg) brightness(1);
+  }
+  50% {
+    filter: hue-rotate(12deg) brightness(1.08);
+  }
+}
+
+.terraria-sky {
+  background:
+    radial-gradient(120% 70% at 50% -5%, #3a4a2e 0%, transparent 55%),
+    linear-gradient(180deg, #1a2230 0%, #24301f 42%, #1b1f1a 78%, #14170f 100%);
+  animation: sky-shift 28s ease-in-out infinite;
+}
+
+.terraria-sun {
+  background: radial-gradient(circle, color-mix(in oklab, #f2c94c 55%, transparent), transparent 70%);
+  animation: star-twinkle 7s ease-in-out infinite;
+}

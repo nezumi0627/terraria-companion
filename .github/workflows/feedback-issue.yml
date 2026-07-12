@@ -1,0 +1,56 @@
+name: Create feedback issue
+
+on:
+  repository_dispatch:
+    types: [app-feedback]
+  workflow_dispatch:
+    inputs:
+      title:
+        description: Issue title
+        required: true
+        type: string
+      body:
+        description: Issue body
+        required: true
+        type: string
+      category:
+        description: bug | idea | other
+        required: false
+        default: other
+        type: string
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  open-issue:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create issue
+        uses: actions/github-script@v7
+        env:
+          INPUT_TITLE: ${{ inputs.title }}
+          INPUT_BODY: ${{ inputs.body }}
+          INPUT_CATEGORY: ${{ inputs.category }}
+        with:
+          script: |
+            const fromDispatch = context.payload.client_payload || {}
+            const title = String(fromDispatch.title || process.env.INPUT_TITLE || '').slice(0, 200)
+            const body = String(fromDispatch.body || process.env.INPUT_BODY || '')
+            const category = String(fromDispatch.category || process.env.INPUT_CATEGORY || 'other')
+            if (!title || !body) {
+              core.setFailed('title/body required')
+              return
+            }
+            const labels = ['feedback']
+            if (category === 'bug') labels.push('bug')
+            if (category === 'idea') labels.push('enhancement')
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body,
+              labels,
+            })
+            core.info(`Created ${issue.data.html_url}`)
