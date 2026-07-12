@@ -1,7 +1,7 @@
 {
   "id": "nezumi0627",
   "pinHash": "8f85d66000972c4a741f930c122227e60fee5c453d7e1b373e229834f76e8d76",
-  "updatedAt": 1783898247108,
+  "updatedAt": 1783898258285,
   "state": {
     "owned": {},
     "defeatedBosses": {},
@@ -21,6 +21,21 @@
       "ガイド"
     ],
     "recentViews": [
+      {
+        "kind": "item",
+        "id": "slap-hand",
+        "at": 1783898255419
+      },
+      {
+        "kind": "item",
+        "id": "psycho-knife",
+        "at": 1783898252835
+      },
+      {
+        "kind": "item",
+        "id": "skeleton-merchant",
+        "at": 1783898249485
+      },
       {
         "kind": "item",
         "id": "classy-cane",
@@ -105,21 +120,6 @@
         "kind": "item",
         "id": "angel-wings",
         "at": 1783876404487
-      },
-      {
-        "kind": "boss",
-        "id": "eye-of-cthulhu",
-        "at": 1783876399311
-      },
-      {
-        "kind": "item",
-        "id": "crimtane-ore",
-        "at": 1783876398041
-      },
-      {
-        "kind": "item",
-        "id": "demonite-ore",
-        "at": 1783876390383
       }
     ],
     "dailyTasks": [],
