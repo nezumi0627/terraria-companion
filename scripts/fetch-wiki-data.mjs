@@ -11,36 +11,11 @@ import { mkdir, writeFile, readFile, access } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { parseEntityText, matchRedirectTarget, looksLikeBadName } from './lib/wiki-parse.mjs'
+import { fetchWikitextResolved, fetchParseLinks } from './lib/wiki-fetch.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = join(__dirname, '..')
 const OUT = join(ROOT, 'data', 'wiki')
-const UA = 'TerrariaCompanionLocal/1.0 (offline mirror for personal app)'
-const JP = 'https://terraria.arcenserv.info/w/api.php'
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
-
-async function mw(params) {
-  const url = new URL(JP)
-  for (const [k, v] of Object.entries(params)) url.searchParams.set(k, String(v))
-  url.searchParams.set('format', 'json')
-  for (let attempt = 0; attempt < 5; attempt++) {
-    const res = await fetch(url, { headers: { 'User-Agent': UA } })
-    if (res.status === 429 || res.status === 503) {
-      await sleep(1000 * (attempt + 1))
-      continue
-    }
-    if (!res.ok) throw new Error(`JP wiki ${res.status}`)
-    return res.json()
-  }
-  throw new Error('rate limited')
-}
-
-async function parsePage(title) {
-  const json = await mw({ action: 'parse', page: title, prop: 'links|wikitext|displaytitle' })
-  await sleep(80)
-  if (json.error) return null
-  return json.parse
-}
 
 function slugify(title) {
   return title
@@ -76,35 +51,24 @@ async function exists(p) {
   }
 }
 
-async function resolvePage(title, depth = 0) {
-  const parsed = await parsePage(title)
-  const wt = parsed?.wikitext?.['*'] || ''
-  const redir = matchRedirectTarget(wt)
-  if (redir && depth < 3) {
-    const next = await resolvePage(redir, depth + 1)
-    return { ...next, redirectChain: [redir, ...(next.redirectChain || [])] }
-  }
-  return { parsed, wt, redirectChain: [] }
-}
-
 async function collectLinksFromHub(hubTitle) {
-  const { parsed, wt } = await resolvePage(hubTitle)
-  if (!parsed) return { titles: [], redirectTo: null }
+  const { links, wt } = await fetchParseLinks(hubTitle)
   const redirect = matchRedirectTarget(wt)
-  if (redirect) {
-    return collectLinksFromHub(redirect)
-  }
-  const titles = [...new Set((parsed.links || []).map((l) => l['*']).filter(isLikelyEntityTitle))]
+  if (redirect) return collectLinksFromHub(redirect)
+  const titles = [...new Set(links.filter(isLikelyEntityTitle))]
   return { titles, redirectTo: null }
 }
 
 async function enrich(titles, kind) {
-  const limit = Number(process.env.WIKI_ENRICH_LIMIT || 250)
+  const limit = Number(process.env.WIKI_ENRICH_LIMIT || 99999)
   const sample = titles.slice(0, limit)
   console.log(`  enriching ${sample.length}/${titles.length} (${kind})…`)
+  const started = Date.now()
+  const wikitextMap = await fetchWikitextResolved(sample)
   const entities = []
   for (const title of sample) {
-    const { wt, redirectChain } = await resolvePage(title)
+    const resolved = wikitextMap.get(title)
+    const wt = resolved?.wt || ''
     if (!wt) {
       process.stdout.write('!')
       continue
@@ -127,12 +91,13 @@ async function enrich(titles, kind) {
       damage,
       source: {
         japanWiki: title,
-        redirectTo: redirectChain[0] || undefined,
+        redirectTo: resolved.redirectChain?.[0] || undefined,
       },
     })
-    process.stdout.write(redirectChain.length ? 'R' : '.')
+    process.stdout.write(resolved.redirectChain?.length ? 'R' : '.')
   }
-  process.stdout.write('\n')
+  const sec = ((Date.now() - started) / 1000).toFixed(1)
+  process.stdout.write(`\n  (${sec}s)\n`)
   return entities
 }
 
