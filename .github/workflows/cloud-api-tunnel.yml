@@ -1,33 +1,32 @@
 name: Cloud API (tunnel)
 
-# Runs the cloud API on a GitHub-hosted runner and publishes a public HTTPS URL
-# via Cloudflare Quick Tunnel (no Cloudflare account required).
-# Token stays in Actions secrets — never in the static Pages bundle.
-#
-# Prefer a durable Cloudflare Worker (deploy-cloud-api.yml) when CLOUDFLARE_*
-# secrets are available. This tunnel is a fallback (~5h lifetime).
+# Fallback when Cloudflare Worker secrets are not set.
+# Publishes a Quick Tunnel URL (~4h) via GitHub Contents API (no git push conflicts).
 
 on:
   workflow_dispatch:
   schedule:
-    # Restart before the ~6h job limit; 4h keeps overlap risk lower than 5h
-    - cron: '0 */4 * * *'
+    - cron: '15 */3 * * *'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/cloud-api-server.mjs'
+      - 'scripts/publish-cloud-api-url.mjs'
+      - 'scripts/extract-tunnel-url.mjs'
+      - '.github/workflows/cloud-api-tunnel.yml'
 
 concurrency:
-  # Do not cancel the live tunnel until the new one has published its URL.
-  # Overlap is brief: new job publishes first, then old job is cancelled by group? 
-  # Actually cancel-in-progress:false allows two runners. We cancel the previous
-  # run explicitly AFTER publishing the new URL.
   group: cloud-api-tunnel
   cancel-in-progress: false
 
 jobs:
   api:
+    # Skip when durable Worker deploy is configured (Worker workflow handles permanent URL)
+    if: ${{ secrets.CLOUDFLARE_API_TOKEN == '' || secrets.CLOUDFLARE_ACCOUNT_ID == '' }}
     runs-on: ubuntu-latest
     timeout-minutes: 290
     permissions:
       contents: write
-      actions: write
     steps:
       - uses: actions/checkout@v4
 
@@ -42,16 +41,19 @@ jobs:
           PORT: '8787'
           ALLOWED_ORIGINS: 'https://nezumi0627.github.io,http://localhost:3000,http://127.0.0.1:3000'
         run: |
+          set +e
           node scripts/cloud-api-server.mjs > /tmp/cloud-api.log 2>&1 &
           echo $! > /tmp/cloud-api.pid
-          for i in $(seq 1 30); do
-            if curl -fsS "http://127.0.0.1:8787/health" >/dev/null; then
-              echo "API ready"
+          for i in $(seq 1 45); do
+            if curl -fsS "http://127.0.0.1:8787/health" >/dev/null 2>&1; then
+              echo "API ready (${i}s)"
               exit 0
             fi
             sleep 1
           done
-          echo "API failed to start"; cat /tmp/cloud-api.log; exit 1
+          echo "API failed to start"
+          cat /tmp/cloud-api.log
+          exit 1
 
       - name: Install cloudflared
         run: |
@@ -64,44 +66,35 @@ jobs:
         run: |
           cloudflared tunnel --url http://127.0.0.1:8787 > /tmp/cloudflared.log 2>&1 &
           echo $! > /tmp/cloudflared.pid
-          URL=""
-          for i in $(seq 1 60); do
-            URL=$(grep -oE 'https://[a-zA-Z0-9-]+\.trycloudflare\.com' /tmp/cloudflared.log | head -n1 || true)
-            if [ -n "$URL" ]; then
+          for i in $(seq 1 90); do
+            if URL=$(node scripts/extract-tunnel-url.mjs /tmp/cloudflared.log 2>/dev/null); then
               echo "tunnel-url=$URL" >> "$GITHUB_OUTPUT"
               echo "Public API: $URL"
               exit 0
             fi
             if ! kill -0 "$(cat /tmp/cloudflared.pid)" 2>/dev/null; then
-              echo "cloudflared exited"; cat /tmp/cloudflared.log; exit 1
+              echo "cloudflared exited"
+              cat /tmp/cloudflared.log
+              exit 1
             fi
             sleep 2
           done
-          echo "Timed out waiting for tunnel URL"; cat /tmp/cloudflared.log; exit 1
+          echo "Timed out waiting for tunnel URL"
+          cat /tmp/cloudflared.log
+          exit 1
 
-      - name: Publish API URL for the app
+      - name: Publish API URL
         env:
-          TUNNEL_URL: ${{ steps.tunnel.outputs.tunnel-url }}
-        run: |
-          mkdir -p public
-          printf '%s\n' "{\"url\":\"$TUNNEL_URL\",\"updatedAt\":$(date +%s000),\"source\":\"actions-tunnel\"}" > public/cloud-api-url.json
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git pull --rebase origin main || git pull --rebase --autostash origin main
-          git add public/cloud-api-url.json
-          if git diff --staged --quiet; then
-            echo "URL unchanged"
-          else
-            git commit -m "chore(cloud): refresh API tunnel URL"
-            for i in 1 2 3; do
-              if git push origin HEAD; then
-                exit 0
-              fi
-              echo "push conflict, rebase retry $i"
-              git pull --rebase origin main
-            done
-            exit 1
-          fi
+          GH_TOKEN: ${{ secrets.CLOUD_API_GITHUB_TOKEN }}
+          GITHUB_REPO: ${{ github.repository }}
+          API_URL: ${{ steps.tunnel.outputs.tunnel-url }}
+          API_SOURCE: actions-tunnel
+        run: node scripts/publish-cloud-api-url.mjs
+
+      - name: Trigger Pages deploy
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run "Deploy GitHub Pages" --ref main || true
 
       - name: Cancel previous tunnel runs
         env:
@@ -114,13 +107,6 @@ jobs:
                 echo "Cancelling old run $id"
                 gh api -X POST "repos/${{ github.repository }}/actions/runs/$id/cancel" || true
               done
-
-      - name: Trigger Pages deploy for URL file
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          # GITHUB_TOKEN pushes do not start other workflows; dispatch explicitly
-          gh workflow run "Deploy GitHub Pages" --ref main || true
 
       - name: Keep tunnel alive
         run: |
