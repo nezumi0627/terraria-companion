@@ -10,8 +10,27 @@ let cachedBase: string | undefined
 let discovery: Promise<string | undefined> | null = null
 let lastDiscoveryAt = 0
 
-const DISCOVERY_TTL_MS = 2 * 60 * 1000
+const DISCOVERY_TTL_MS = 45 * 1000
+const DISCOVERY_TTL_NEAR_EXPIRY_MS = 15 * 1000
 const DISCOVERY_TTL_DURABLE_MS = 30 * 60 * 1000
+const EXPIRY_BUFFER_MS = 5 * 60 * 1000
+
+type UrlMeta = {
+  url?: string
+  source?: string
+  expiresAt?: number
+  updatedAt?: number
+  rotationLoop?: boolean
+}
+
+let lastMeta: UrlMeta | null = null
+
+function discoveryTtl(base: string): number {
+  if (isDurableApiUrl(base)) return DISCOVERY_TTL_DURABLE_MS
+  const exp = lastMeta?.expiresAt
+  if (exp && Date.now() > exp - EXPIRY_BUFFER_MS) return DISCOVERY_TTL_NEAR_EXPIRY_MS
+  return DISCOVERY_TTL_MS
+}
 
 function normalizeBase(raw: string): string {
   return raw.trim().replace(/\/+$/, '')
@@ -57,9 +76,10 @@ function clearDiscovery() {
   cachedBase = undefined
   discovery = null
   lastDiscoveryAt = 0
+  lastMeta = null
 }
 
-async function fetchUrlJson(): Promise<{ url?: string; source?: string } | null> {
+async function fetchUrlJson(): Promise<UrlMeta | null> {
   if (typeof window === 'undefined') return null
 
   const repo = process.env.NEXT_PUBLIC_GITHUB_REPO?.trim() || 'nezumi0627/terraria-companion'
@@ -73,7 +93,7 @@ async function fetchUrlJson(): Promise<{ url?: string; source?: string } | null>
     try {
       const res = await fetch(src, { cache: 'no-store' })
       if (!res.ok) continue
-      const json = (await res.json()) as { url?: string; source?: string }
+      const json = (await res.json()) as UrlMeta
       if (!json.url) continue
       return json
     } catch {
@@ -104,7 +124,7 @@ export async function resolveCloudApiBase(opts?: { force?: boolean }): Promise<s
   }
 
   const force = opts?.force === true
-  const ttl = cachedBase && isDurableApiUrl(cachedBase) ? DISCOVERY_TTL_DURABLE_MS : DISCOVERY_TTL_MS
+  const ttl = cachedBase ? discoveryTtl(cachedBase) : DISCOVERY_TTL_MS
   const fresh = Date.now() - lastDiscoveryAt < ttl
   if (!force && cachedBase && fresh) {
     return cachedBase
@@ -114,12 +134,16 @@ export async function resolveCloudApiBase(opts?: { force?: boolean }): Promise<s
 
   discovery = (async () => {
     const meta = await fetchUrlJson()
+    lastMeta = meta
     const url = meta?.url ? normalizeBase(String(meta.url)) : undefined
     if (!url) {
       clearDiscovery()
       return undefined
     }
-    // Stale tunnel URLs in an old Pages bundle — still try health; skip only if env says ephemeral bake-in
+    if (meta?.expiresAt && Date.now() > meta.expiresAt) {
+      clearDiscovery()
+      return undefined
+    }
     const ok = await probeHealth(url)
     if (!ok) {
       clearDiscovery()

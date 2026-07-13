@@ -1,18 +1,20 @@
 name: Cloud API (tunnel)
 
-# Fallback when Cloudflare Worker secrets are not set.
-# Publishes a Quick Tunnel URL (~4h) via GitHub Contents API (no git push conflicts).
+# Temporary URL loop: Quick Tunnel → push cloud-api-url.json → keep alive → rotate before expiry.
+# Client reads main/public/cloud-api-url.json (raw.githubusercontent.com) and re-fetches when dead.
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: '15 */3 * * *'
+    # Rotate every 2h (tunnel ~4–5h); overlap with previous run until new URL is live
+    - cron: '30 */2 * * *'
   push:
     branches: [main]
     paths:
       - 'scripts/cloud-api-server.mjs'
       - 'scripts/publish-cloud-api-url.mjs'
       - 'scripts/extract-tunnel-url.mjs'
+      - 'scripts/probe-cloud-api-health.mjs'
       - '.github/workflows/cloud-api-tunnel.yml'
 
 concurrency:
@@ -21,12 +23,13 @@ concurrency:
 
 jobs:
   api:
-    # Skip when durable Worker deploy is configured (Worker workflow handles permanent URL)
-    if: ${{ secrets.CLOUDFLARE_API_TOKEN == '' || secrets.CLOUDFLARE_ACCOUNT_ID == '' }}
     runs-on: ubuntu-latest
     timeout-minutes: 290
     permissions:
       contents: write
+      actions: write
+    env:
+      TUNNEL_URL: ''
     steps:
       - uses: actions/checkout@v4
 
@@ -83,18 +86,26 @@ jobs:
           cat /tmp/cloudflared.log
           exit 1
 
-      - name: Publish API URL
+      - name: Verify tunnel health (public)
+        env:
+          TUNNEL_URL: ${{ steps.tunnel.outputs.tunnel-url }}
+        run: |
+          for i in $(seq 1 20); do
+            if node scripts/probe-cloud-api-health.mjs "$TUNNEL_URL"; then
+              exit 0
+            fi
+            sleep 3
+          done
+          exit 1
+
+      - name: Publish API URL to main
         env:
           GH_TOKEN: ${{ secrets.CLOUD_API_GITHUB_TOKEN }}
           GITHUB_REPO: ${{ github.repository }}
           API_URL: ${{ steps.tunnel.outputs.tunnel-url }}
           API_SOURCE: actions-tunnel
+          API_EXPIRES_MS: '12600000'
         run: node scripts/publish-cloud-api-url.mjs
-
-      - name: Trigger Pages deploy
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh workflow run "Deploy GitHub Pages" --ref main || true
 
       - name: Cancel previous tunnel runs
         env:
@@ -108,14 +119,43 @@ jobs:
                 gh api -X POST "repos/${{ github.repository }}/actions/runs/$id/cancel" || true
               done
 
-      - name: Keep tunnel alive
+      - name: Keep tunnel alive (rotate when public URL dies)
+        env:
+          TUNNEL_URL: ${{ steps.tunnel.outputs.tunnel-url }}
         run: |
-          echo "Keeping cloud API alive until job timeout…"
+          echo "Keeping cloud API alive; will enqueue rotation if public URL fails…"
+          FAILS=0
           while kill -0 "$(cat /tmp/cloud-api.pid)" 2>/dev/null && kill -0 "$(cat /tmp/cloudflared.pid)" 2>/dev/null; do
             sleep 60
-            curl -fsS "http://127.0.0.1:8787/health" >/dev/null || exit 1
+            if ! curl -fsS "http://127.0.0.1:8787/health" >/dev/null 2>&1; then
+              echo "Local API unhealthy"
+              exit 1
+            fi
+            if node scripts/probe-cloud-api-health.mjs "$TUNNEL_URL" 2>/dev/null; then
+              FAILS=0
+            else
+              FAILS=$((FAILS + 1))
+              echo "Public tunnel probe failed ($FAILS/3)"
+              if [ "$FAILS" -ge 3 ]; then
+                echo "Tunnel expired — ending run to rotate"
+                exit 1
+              fi
+            fi
           done
           echo "Process exited early"
           cat /tmp/cloud-api.log || true
           cat /tmp/cloudflared.log || true
           exit 1
+
+      - name: Enqueue next tunnel (rotation loop)
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          IN_PROGRESS=$(gh api "repos/${{ github.repository }}/actions/workflows/cloud-api-tunnel.yml/runs?status=in_progress&per_page=5" --jq 'length')
+          if [ "$IN_PROGRESS" -gt 1 ]; then
+            echo "Another tunnel run already in progress ($IN_PROGRESS), skip enqueue"
+            exit 0
+          fi
+          echo "Enqueueing fresh tunnel workflow…"
+          gh workflow run "Cloud API (tunnel)" --ref main

@@ -39,7 +39,7 @@ export function AuthPanel({ onFlash }: { onFlash: (msg: string) => void }) {
     void check()
     const timer = setInterval(() => {
       if (!cancelled) void refreshCloudApiBase().then((base) => setApiOk(!!base))
-    }, 90_000)
+    }, 60_000)
     const onVis = () => {
       if (document.visibilityState === 'visible') {
         void refreshCloudApiBase().then((base) => setApiOk(!!base))
