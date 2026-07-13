@@ -4,12 +4,6 @@ name: Deploy Cloud API (Cloudflare Worker)
 # Requires repo Secrets: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, CLOUD_API_GITHUB_TOKEN
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'workers/cloud-api/**'
-      - 'scripts/publish-cloud-api-url.mjs'
-      - '.github/workflows/deploy-cloud-api.yml'
   workflow_dispatch:
 
 jobs:

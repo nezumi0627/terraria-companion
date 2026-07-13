@@ -2,6 +2,7 @@
  * Publish public/cloud-api-url.json via GitHub Contents API (no git push conflicts).
  *
  * Env: API_URL (required), API_SOURCE (workers-dev | actions-tunnel),
+ *      API_EXPIRES_MS (optional, default 3.5h for tunnel),
  *      GH_TOKEN or CLOUD_API_GITHUB_TOKEN, GITHUB_REPO
  */
 const repo = process.env.GITHUB_REPO || 'nezumi0627/terraria-companion'
@@ -9,6 +10,8 @@ const token = process.env.GH_TOKEN || process.env.CLOUD_API_GITHUB_TOKEN || ''
 const url = String(process.env.API_URL || '').trim().replace(/\/+$/, '')
 const source = process.env.API_SOURCE || 'actions-tunnel'
 const path = 'public/cloud-api-url.json'
+
+const TUNNEL_TTL_MS = Number(process.env.API_EXPIRES_MS || 3.5 * 60 * 60 * 1000)
 
 if (!token) {
   console.error('GH_TOKEN is required')
@@ -26,10 +29,16 @@ const headers = {
   'User-Agent': 'terraria-companion-publish-url',
 }
 
+/** @type {{ url: string; updatedAt: number; source: string; expiresAt?: number; rotationLoop?: boolean }} */
 const payload = {
   url,
   updatedAt: Date.now(),
   source,
+}
+
+if (source === 'actions-tunnel') {
+  payload.expiresAt = Date.now() + TUNNEL_TTL_MS
+  payload.rotationLoop = true
 }
 
 const getRes = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, { headers })
@@ -49,7 +58,7 @@ if (getRes.ok) {
 }
 
 const body = {
-  message: `chore(cloud): refresh API URL (${source})`,
+  message: `chore(cloud): refresh API tunnel URL`,
   content: Buffer.from(JSON.stringify(payload, null, 2) + '\n', 'utf8').toString('base64'),
   committer: {
     name: 'github-actions[bot]',
@@ -70,4 +79,4 @@ if (!putRes.ok) {
   process.exit(1)
 }
 
-console.log('Published', url, 'source=', source)
+console.log('Published', url, 'source=', source, payload.expiresAt ? `expires=${new Date(payload.expiresAt).toISOString()}` : '')
