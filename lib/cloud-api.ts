@@ -11,6 +11,7 @@ let discovery: Promise<string | undefined> | null = null
 let lastDiscoveryAt = 0
 
 const DISCOVERY_TTL_MS = 2 * 60 * 1000
+const DISCOVERY_TTL_DURABLE_MS = 30 * 60 * 1000
 
 function normalizeBase(raw: string): string {
   return raw.trim().replace(/\/+$/, '')
@@ -23,6 +24,19 @@ export function isEphemeralApiUrl(url: string): boolean {
     return host.endsWith('.trycloudflare.com')
   } catch {
     return true
+  }
+}
+
+/** workers.dev / custom domain — safe to cache and bake into Pages builds. */
+export function isDurableApiUrl(url: string): boolean {
+  try {
+    const host = new URL(url).hostname
+    if (host.endsWith('.workers.dev')) return true
+    if (host.endsWith('.nezumi0627.github.io')) return false
+    if (isEphemeralApiUrl(url)) return false
+    return host.includes('.') && !host.endsWith('github.io')
+  } catch {
+    return false
   }
 }
 
@@ -45,28 +59,28 @@ function clearDiscovery() {
   lastDiscoveryAt = 0
 }
 
-async function fetchUrlJson(): Promise<string | undefined> {
-  if (typeof window === 'undefined') return undefined
+async function fetchUrlJson(): Promise<{ url?: string; source?: string } | null> {
+  if (typeof window === 'undefined') return null
 
   const repo = process.env.NEXT_PUBLIC_GITHUB_REPO?.trim() || 'nezumi0627/terraria-companion'
+  const bust = Date.now()
   const candidates = [
-    // Tunnel bot commits with GITHUB_TOKEN do not trigger Pages — read main tip directly
-    `https://raw.githubusercontent.com/${repo}/main/public/cloud-api-url.json`,
-    publicUrl('/cloud-api-url.json'),
+    `https://raw.githubusercontent.com/${repo}/main/public/cloud-api-url.json?t=${bust}`,
+    `${publicUrl('/cloud-api-url.json')}?t=${bust}`,
   ]
 
   for (const src of candidates) {
     try {
       const res = await fetch(src, { cache: 'no-store' })
       if (!res.ok) continue
-      const json = (await res.json()) as { url?: string }
+      const json = (await res.json()) as { url?: string; source?: string }
       if (!json.url) continue
-      return normalizeBase(String(json.url))
+      return json
     } catch {
       /* try next */
     }
   }
-  return undefined
+  return null
 }
 
 async function probeHealth(base: string): Promise<boolean> {
@@ -90,7 +104,8 @@ export async function resolveCloudApiBase(opts?: { force?: boolean }): Promise<s
   }
 
   const force = opts?.force === true
-  const fresh = Date.now() - lastDiscoveryAt < DISCOVERY_TTL_MS
+  const ttl = cachedBase && isDurableApiUrl(cachedBase) ? DISCOVERY_TTL_DURABLE_MS : DISCOVERY_TTL_MS
+  const fresh = Date.now() - lastDiscoveryAt < ttl
   if (!force && cachedBase && fresh) {
     return cachedBase
   }
@@ -98,11 +113,13 @@ export async function resolveCloudApiBase(opts?: { force?: boolean }): Promise<s
   if (!force && discovery) return discovery
 
   discovery = (async () => {
-    const url = await fetchUrlJson()
+    const meta = await fetchUrlJson()
+    const url = meta?.url ? normalizeBase(String(meta.url)) : undefined
     if (!url) {
       clearDiscovery()
       return undefined
     }
+    // Stale tunnel URLs in an old Pages bundle — still try health; skip only if env says ephemeral bake-in
     const ok = await probeHealth(url)
     if (!ok) {
       clearDiscovery()

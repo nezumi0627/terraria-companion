@@ -29,15 +29,27 @@ export function AuthPanel({ onFlash }: { onFlash: (msg: string) => void }) {
 
   useEffect(() => {
     let cancelled = false
-    ;(async () => {
+    const check = async () => {
       const ok = await cloudApiReady()
       if (!cancelled) {
         setApiOk(ok)
         setApiChecking(false)
       }
-    })()
+    }
+    void check()
+    const timer = setInterval(() => {
+      if (!cancelled) void refreshCloudApiBase().then((base) => setApiOk(!!base))
+    }, 90_000)
+    const onVis = () => {
+      if (document.visibilityState === 'visible') {
+        void refreshCloudApiBase().then((base) => setApiOk(!!base))
+      }
+    }
+    document.addEventListener('visibilitychange', onVis)
     return () => {
       cancelled = true
+      clearInterval(timer)
+      document.removeEventListener('visibilitychange', onVis)
     }
   }, [])
 
