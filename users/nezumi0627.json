@@ -1,7 +1,7 @@
 {
   "id": "nezumi0627",
   "pinHash": "8f85d66000972c4a741f930c122227e60fee5c453d7e1b373e229834f76e8d76",
-  "updatedAt": 1784040690607,
+  "updatedAt": 1784040878923,
   "state": {
     "owned": {},
     "defeatedBosses": {},
@@ -21,6 +21,11 @@
       "ガイド"
     ],
     "recentViews": [
+      {
+        "kind": "item",
+        "id": "exotic-scimitar",
+        "at": 1784040876123
+      },
       {
         "kind": "item",
         "id": "bone-glove",
@@ -115,11 +120,6 @@
         "kind": "item",
         "id": "monks-belt",
         "at": 1783876452628
-      },
-      {
-        "kind": "item",
-        "id": "whoopie-cushion",
-        "at": 1783876445594
       }
     ],
     "dailyTasks": [],
