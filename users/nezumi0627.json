@@ -1,7 +1,7 @@
 {
   "id": "nezumi0627",
   "pinHash": "8f85d66000972c4a741f930c122227e60fee5c453d7e1b373e229834f76e8d76",
-  "updatedAt": 1784040894458,
+  "updatedAt": 1784040899825,
   "state": {
     "owned": {},
     "defeatedBosses": {},
@@ -21,6 +21,11 @@
       "ガイド"
     ],
     "recentViews": [
+      {
+        "kind": "item",
+        "id": "psycho",
+        "at": 1784040897028
+      },
       {
         "kind": "item",
         "id": "hell-armored-bones",
@@ -115,11 +120,6 @@
         "kind": "station",
         "id": "mythril-anvil",
         "at": 1783894572415
-      },
-      {
-        "kind": "item",
-        "id": "living-loom",
-        "at": 1783876482381
       }
     ],
     "dailyTasks": [],
