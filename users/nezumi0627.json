@@ -1,7 +1,7 @@
 {
   "id": "nezumi0627",
   "pinHash": "8f85d66000972c4a741f930c122227e60fee5c453d7e1b373e229834f76e8d76",
-  "updatedAt": 1784040884842,
+  "updatedAt": 1784040894458,
   "state": {
     "owned": {},
     "defeatedBosses": {},
@@ -21,6 +21,11 @@
       "ガイド"
     ],
     "recentViews": [
+      {
+        "kind": "item",
+        "id": "hell-armored-bones",
+        "at": 1784040891688
+      },
       {
         "kind": "item",
         "id": "rusty-armored-bones",
@@ -115,11 +120,6 @@
         "kind": "item",
         "id": "living-loom",
         "at": 1783876482381
-      },
-      {
-        "kind": "item",
-        "id": "bar",
-        "at": 1783876474648
       }
     ],
     "dailyTasks": [],
