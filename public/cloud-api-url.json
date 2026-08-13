@@ -1,7 +1,7 @@
 {
-  "url": "https://authorities-transcripts-statement-mit.trycloudflare.com",
-  "updatedAt": 1786580823941,
+  "url": "https://flows-views-quarterly-lambda.trycloudflare.com",
+  "updatedAt": 1786598252701,
   "source": "actions-tunnel",
-  "expiresAt": 1786593423941,
+  "expiresAt": 1786610852701,
   "rotationLoop": true
 }
